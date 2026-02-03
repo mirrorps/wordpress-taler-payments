@@ -1,6 +1,6 @@
 {
   "name": "mirrorps/wordpress-taler-payments",
-  "description": "Standalone WordPress plugin integrating GNU Taler payments.",
+  "description": "WordPress plugin integrating GNU Taler payments.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {
