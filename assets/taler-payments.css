@@ -1,0 +1,167 @@
+.taler-pay-button {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.taler-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: none;
+}
+
+.taler-modal[aria-hidden="false"] {
+  display: block;
+}
+
+.taler-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.taler-modal__dialog {
+  position: relative;
+  max-width: 540px;
+  margin: 8vh auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  padding: 18px 18px 16px;
+}
+
+.taler-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 22px;
+  line-height: 36px;
+  cursor: pointer;
+}
+
+.taler-modal__title {
+  margin: 0 36px 12px 0;
+  font-size: 18px;
+}
+
+.taler-modal__summary {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 0 0 12px;
+}
+
+.taler-modal__row {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.taler-modal__label {
+  width: 90px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+}
+
+.taler-modal__value {
+  flex: 1;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.taler-modal__status {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 13px;
+  margin: 6px 0;
+  min-height: 18px;
+}
+
+.taler-modal__error {
+  color: #b00020;
+  font-size: 13px;
+  margin: 6px 0;
+  min-height: 18px;
+}
+
+.taler-modal__actions {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.taler-modal__primary {
+  display: inline-block;
+  text-align: center;
+  background: #0a7;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.taler-modal__primary[aria-disabled="true"] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.taler-modal__help {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.taler-modal__help a {
+  color: #0a7;
+}
+
+.taler-modal__qr {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 12px;
+}
+
+.taler-modal__qr-label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 10px;
+}
+
+.taler-modal__qr-box {
+  display: inline-block;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.taler-modal__qr-box svg,
+.taler-modal__qr-box canvas,
+.taler-modal__qr-box img {
+  display: block;
+  width: 220px;
+  height: 220px;
+}
+
+.taler-modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 600px) {
+  .taler-modal__dialog {
+    margin: 4vh 12px;
+  }
+  .taler-modal__qr-box svg,
+  .taler-modal__qr-box canvas,
+  .taler-modal__qr-box img {
+    width: 200px;
+    height: 200px;
+  }
+}
+
