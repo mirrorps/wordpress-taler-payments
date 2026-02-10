@@ -1,0 +1,26 @@
+# Dependencies
+/vendor/
+node_modules/
+
+# Logs
+*.log
+
+# OS Files (macOS)
+.DS_Store
+.DS_Store?
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# WordPress Runtime
+**/uploads/
+wp-config.php
+*.sql
+*.zip
+.env*
+
+# Build artifacts
+dist/
+build/
