@@ -8,11 +8,15 @@
  * Author: mirrorps
  */
 
- require_once __DIR__ . '/vendor/autoload.php';
-
 if (!defined( 'ABSPATH')){
 	exit;
 }
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+require_once plugin_dir_path(__FILE__) . 'includes/helpers.php';
+
+include_once plugin_dir_path(__FILE__) . 'includes/admin-taler-settings.php';
 
 define('TALER_PAYMENTS_VERSION', '0.1.0');
 
