@@ -11,13 +11,13 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Encrypt a password for storage using libsodium secretbox.
+ * Encrypt a string for storage using libsodium secretbox.
  *
  * Returns a base64 string containing nonce+ciphertext, or an empty string on failure.
  */
-if (!function_exists('taler_encrypt_password')) {
-	function taler_encrypt_password(string $password): string {
-		if ($password === '') {
+if (!function_exists('taler_encrypt_str')) {
+	function taler_encrypt_str(string $plaintext): string {
+		if ($plaintext === '') {
 			return '';
 		}
 
@@ -38,7 +38,7 @@ if (!function_exists('taler_encrypt_password')) {
 		try {
 			$key = substr(hash('sha256', $key_material, true), 0, SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
 			$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-			$encrypted = sodium_crypto_secretbox($password, $nonce, $key);
+			$encrypted = sodium_crypto_secretbox($plaintext, $nonce, $key);
 		} catch (\Throwable $e) {
 			return '';
 		}
@@ -48,12 +48,12 @@ if (!function_exists('taler_encrypt_password')) {
 }
 
 /**
- * Decrypt a password previously encrypted with taler_encrypt_password().
+ * Decrypt a string previously encrypted with taler_encrypt_str().
  *
- * Returns the decrypted password, or an empty string on failure.
+ * Returns the decrypted string, or an empty string on failure.
  */
-if (!function_exists('taler_decrypt_password')) {
-	function taler_decrypt_password(string $encrypted_data): string {
+if (!function_exists('taler_decrypt_str')) {
+	function taler_decrypt_str(string $encrypted_data): string {
 		if ($encrypted_data === '') {
 			return '';
 		}

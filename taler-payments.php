@@ -38,8 +38,12 @@ function taler_wp_client(): \Taler\Taler
         // Configure via environment variables or wp-config.php constants.
         // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
         $baseUrl = getenv('TALER_BASE_URL') ?: (defined('TALER_BASE_URL') ? constant('TALER_BASE_URL') : '');
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-        $token   = getenv('TALER_TOKEN') ?: (defined('TALER_TOKEN') ? constant('TALER_TOKEN') : '');
+
+        $token = '';
+        $options = get_option('taler_options');
+        if (!empty($options['taler_token'])) {
+            $token = taler_decrypt_str((string) $options['taler_token']);
+        }
 
         $client = Factory::create([
             'base_url' => $baseUrl,
