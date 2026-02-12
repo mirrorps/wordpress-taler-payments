@@ -1,0 +1,19 @@
+.taler-delete-button {
+  background: #d63638 !important;
+  border-color: #d63638 !important;
+  color: #fff !important;
+}
+
+.taler-delete-button:hover,
+.taler-delete-button:focus {
+  background: #b32d2e !important;
+  border-color: #b32d2e !important;
+  color: #fff !important;
+}
+
+.taler-form-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
