@@ -35,12 +35,14 @@ function taler_wp_client(): \Taler\Taler
     static $client = null;
 
     if ($client === null) {
-        // Configure via environment variables or wp-config.php constants.
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-        $baseUrl = getenv('TALER_BASE_URL') ?: (defined('TALER_BASE_URL') ? constant('TALER_BASE_URL') : '');
+        $options = get_option('taler_options');
+
+        $baseUrl = '';
+        if (is_array($options) && !empty($options['taler_base_url'])) {
+            $baseUrl = (string) $options['taler_base_url'];
+        }
 
         $token = '';
-        $options = get_option('taler_options');
         if (!empty($options['taler_token'])) {
             $token = taler_decrypt_str((string) $options['taler_token']);
         }

@@ -59,7 +59,13 @@ function taler_get_options(): array
 
 function taler_register_settings(): void
 {
-    // Keep the two forms separate by registering two settings groups, but store everything in one option array.
+    register_setting('taler_baseurl_group', 'taler_options', [
+        'type'              => 'array',
+        'sanitize_callback' => 'taler_options_sanitize',
+        'default'           => [],
+    ]);
+
+    // Keep the forms separate by registering settings groups, but store everything in one option array.
     register_setting('taler_userpass_group', 'taler_options', [
         'type'              => 'array',
         'sanitize_callback' => 'taler_options_sanitize',
@@ -112,6 +118,51 @@ function taler_options_sanitize($input): array
     $input = is_array($input) ? $input : [];
 
     $option_page = isset($_POST['option_page']) ? sanitize_text_field(wp_unslash($_POST['option_page'])) : '';
+
+    if ($option_page === 'taler_baseurl_group') {
+        $is_delete = !empty($_POST['taler_baseurl_delete']);
+        if ($is_delete) {
+            unset($new['taler_base_url']);
+            taler_add_settings_error_once(
+                'taler_options',
+                'taler_baseurl_deleted',
+                __('Base URL deleted.', 'taler-payments'),
+                'updated'
+            );
+            return $new;
+        }
+
+        $base_url = isset($input['taler_base_url']) ? (string) wp_unslash($input['taler_base_url']) : '';
+        $base_url = trim($base_url);
+
+        if ($base_url === '') {
+            taler_add_settings_error_once(
+                'taler_options',
+                'taler_baseurl_required',
+                __('Please provide a base URL.', 'taler-payments'),
+                'error'
+            );
+            return $old;
+        }
+
+        $base_url = esc_url_raw($base_url, ['https']);
+        $parsed = wp_parse_url($base_url);
+        $scheme = is_array($parsed) && isset($parsed['scheme']) ? strtolower((string) $parsed['scheme']) : '';
+
+        if ($base_url === '' || $scheme !== 'https') {
+            taler_add_settings_error_once(
+                'taler_options',
+                'taler_baseurl_invalid',
+                __('Base URL must start with https://', 'taler-payments'),
+                'error'
+            );
+            return $old;
+        }
+
+        $new['taler_base_url'] = $base_url;
+
+        return $new;
+    }
 
     if ($option_page === 'taler_userpass_group') {
         // Deleting credentials should bypass HTML required validation via `formnovalidate` on the delete button.
@@ -224,116 +275,159 @@ function taler_settings_page() {
 
     $has_userpass = ($saved_username !== '') || !empty($options['ext_password']);
     $has_token = !empty($options['taler_token']);
+    $saved_base_url = isset($options['taler_base_url']) ? (string) $options['taler_base_url'] : '';
+    $has_base_url = ($saved_base_url !== '');
 
     $delete_confirm = __('Deleting credentials is irreversible. Are you sure you want to continue?', 'taler-payments');
     ?>
     <div class="wrap">
         <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
-        <div class="notice notice-info">
-            <p><?php
-                echo wp_kses_post(sprintf(
-                    __('<strong>Security:</strong> Passwords and tokens are <strong>encrypted</strong> before database storage.', 'taler-payments')
-                ));
-            ?></p>
+        <h2><?php echo esc_html__('Taler Merchant Backend', 'taler-payments'); ?></h2>
+        <div class="taler-settings-group">
+            <div class="notice notice-info inline">
+                <p><?php
+                    echo wp_kses_post(sprintf(
+                        __('<strong>Security:</strong> Passwords and tokens are <strong>encrypted</strong> before database storage.', 'taler-payments')
+                    ));
+                ?></p>
+            </div>
+
+            <div class="notice notice-info inline">
+                <p><?php echo wp_kses_post(sprintf(
+                    __('Provide either <strong>%1$s</strong> or an <strong>%2$s</strong> to access <strong>Taler Merchant Backend</strong>. If both are provided, the <strong>%2$s</strong> is used with priority.', 'taler-payments'),
+                    esc_html__('Username & Password', 'taler-payments'),
+                    esc_html__('Access Token', 'taler-payments')
+                )); ?>
+                </p>
+            </div>
+
+            <h3 class="taler-settings-subheading"><?php echo esc_html__('Base URL', 'taler-payments'); ?></h3>
+            <form id="taler-baseurl-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
+                <?php settings_fields('taler_baseurl_group'); ?>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="taler-base-url"><?php echo esc_html__('Taler Base URL *', 'taler-payments'); ?></label></th>
+                        <td>
+                            <input
+                                type="text"
+                                id="taler-base-url"
+                                name="taler_options[taler_base_url]"
+                                value="<?php echo esc_attr($saved_base_url); ?>"
+                                class="regular-text ltr"
+                                placeholder="https://backend.demo.taler.net/instances/sandbox"
+                                required
+                            />
+                            <p class="description"><?php echo esc_html__('Taler Merchant Backend Insance URL, must start with https://', 'taler-payments'); ?></p>
+                        </td>
+                    </tr>
+                </table>
+                <div class="taler-form-actions">
+                    <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'taler-payments'); ?></button>
+                    <?php if ($has_base_url) : ?>
+                        <button
+                            type="submit"
+                            name="taler_baseurl_delete"
+                            value="1"
+                            class="button taler-delete-button"
+                            formnovalidate
+                            onclick="return confirm('<?php echo esc_attr($delete_confirm); ?>');"
+                        ><?php echo esc_html__('Delete', 'taler-payments'); ?></button>
+                    <?php endif; ?>
+                </div>
+            </form>
+
+            <hr class="taler-divider" />
+
+            <h3 class="taler-settings-subheading"><?php echo esc_html__('Username & Password', 'taler-payments'); ?></h3>
+            <form id="taler-userpass-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
+                <?php settings_fields('taler_userpass_group'); ?>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="taler-ext-username"><?php echo esc_html__('Username *', 'taler-payments'); ?></label></th>
+                        <td>
+                            <input type="text" id="taler-ext-username" name="taler_options[ext_username]" value="<?php echo esc_attr($username); ?>" class="regular-text" required />
+                            <p class="description"><?php echo esc_html__('Username/API key for Taler external system.', 'taler-payments'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="taler-ext-password"><?php echo esc_html__('Password *', 'taler-payments'); ?></label></th>
+                        <td>
+                            <input
+                                type="password"
+                                id="taler-ext-password"
+                                name="taler_options[ext_password]"
+                                value="<?php echo esc_attr($password); ?>"
+                                <?php echo $has_userpass ? 'placeholder="' . esc_attr__('(stored)', 'taler-payments') . '"' : ''; ?>
+                                class="regular-text ltr"
+                                autocomplete="new-password"
+                                <?php echo $has_userpass ? '' : 'required'; ?>
+                            />
+                            <p class="description">
+                                <?php echo wp_kses_post(__(
+                                    'Password will be <strong>encrypted</strong> before storage.',
+                                    'taler-payments'
+                                )); ?>
+                                <?php if ($has_userpass) : ?>
+                                    <?php echo ' ' . esc_html__('Leave blank to keep the stored password.', 'taler-payments'); ?>
+                                <?php endif; ?>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <div class="taler-form-actions">
+                    <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'taler-payments'); ?></button>
+                    <?php if ($has_userpass) : ?>
+                        <button
+                            type="submit"
+                            name="taler_userpass_delete"
+                            value="1"
+                            class="button taler-delete-button"
+                            formnovalidate
+                            onclick="return confirm('<?php echo esc_attr($delete_confirm); ?>');"
+                        ><?php echo esc_html__('Delete', 'taler-payments'); ?></button>
+                    <?php endif; ?>
+                </div>
+            </form>
+
+            <hr class="taler-divider" />
+
+            <h3 class="taler-settings-subheading"><?php echo esc_html__('Access Token', 'taler-payments'); ?></h3>
+            <form id="taler-token-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
+                <?php settings_fields('taler_token_group'); ?>
+                <table class="form-table" role="presentation">
+                    <tr>
+                        <th scope="row"><label for="taler-token"><?php echo esc_html__('Access Token *', 'taler-payments'); ?></label></th>
+                        <td>
+                            <input
+                                type="password"
+                                id="taler-token"
+                                name="taler_options[taler_token]"
+                                value="<?php echo esc_attr($token_value); ?>"
+                                <?php echo $has_token ? 'placeholder="' . esc_attr__('(stored)', 'taler-payments') . '"' : ''; ?>
+                                class="regular-text ltr"
+                                autocomplete="new-password"
+                                required
+                            />
+                            <p class="description"><?php echo wp_kses_post(__('Access token is <strong>encrypted</strong> before storage.', 'taler-payments')); ?></p>
+                        </td>
+                    </tr>
+                </table>
+                <div class="taler-form-actions">
+                    <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'taler-payments'); ?></button>
+                    <?php if ($has_token) : ?>
+                        <button
+                            type="submit"
+                            name="taler_token_delete"
+                            value="1"
+                            class="button taler-delete-button"
+                            formnovalidate
+                            onclick="return confirm('<?php echo esc_attr($delete_confirm); ?>');"
+                        ><?php echo esc_html__('Delete', 'taler-payments'); ?></button>
+                    <?php endif; ?>
+                </div>
+            </form>
         </div>
-
-        <p class="description">
-            <?php echo wp_kses_post(sprintf(
-                __('Provide either <strong>%1$s</strong> or an <strong>%2$s</strong>. If both are provided, the <strong>%2$s</strong> is used with priority.', 'taler-payments'),
-                esc_html__('Username & Password', 'taler-payments'),
-                esc_html__('Access Token', 'taler-payments')
-            )); ?>
-        </p>
-
-        <h2><?php echo esc_html__('Username & Password', 'taler-payments'); ?></h2>
-        <form id="taler-userpass-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
-            <?php settings_fields('taler_userpass_group'); ?>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><label for="taler-ext-username"><?php echo esc_html__('Username *', 'taler-payments'); ?></label></th>
-                    <td>
-                        <input type="text" id="taler-ext-username" name="taler_options[ext_username]" value="<?php echo esc_attr($username); ?>" class="regular-text" required />
-                        <p class="description"><?php echo esc_html__('Username/API key for Taler external system.', 'taler-payments'); ?></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><label for="taler-ext-password"><?php echo esc_html__('Password *', 'taler-payments'); ?></label></th>
-                    <td>
-                        <input
-                            type="password"
-                            id="taler-ext-password"
-                            name="taler_options[ext_password]"
-                            value="<?php echo esc_attr($password); ?>"
-                            <?php echo $has_userpass ? 'placeholder="' . esc_attr__('(stored)', 'taler-payments') . '"' : ''; ?>
-                            class="regular-text ltr"
-                            autocomplete="new-password"
-                            <?php echo $has_userpass ? '' : 'required'; ?>
-                        />
-                        <p class="description">
-                            <?php echo wp_kses_post(__(
-                                'Password will be <strong>encrypted</strong> before storage.',
-                                'taler-payments'
-                            )); ?>
-                            <?php if ($has_userpass) : ?>
-                                <?php echo ' ' . esc_html__('Leave blank to keep the stored password.', 'taler-payments'); ?>
-                            <?php endif; ?>
-                        </p>
-                    </td>
-                </tr>
-            </table>
-            <div class="taler-form-actions">
-                <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'taler-payments'); ?></button>
-                <?php if ($has_userpass) : ?>
-                    <button
-                        type="submit"
-                        name="taler_userpass_delete"
-                        value="1"
-                        class="button taler-delete-button"
-                        formnovalidate
-                        onclick="return confirm('<?php echo esc_attr($delete_confirm); ?>');"
-                    ><?php echo esc_html__('Delete', 'taler-payments'); ?></button>
-                <?php endif; ?>
-            </div>
-        </form>
-
-        <hr />
-
-        <h2><?php echo esc_html__('Access Token', 'taler-payments'); ?></h2>
-        <form id="taler-token-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
-            <?php settings_fields('taler_token_group'); ?>
-            <table class="form-table" role="presentation">
-                <tr>
-                    <th scope="row"><label for="taler-token"><?php echo esc_html__('Access Token *', 'taler-payments'); ?></label></th>
-                    <td>
-                        <input
-                            type="password"
-                            id="taler-token"
-                            name="taler_options[taler_token]"
-                            value="<?php echo esc_attr($token_value); ?>"
-                            <?php echo $has_token ? 'placeholder="' . esc_attr__('(stored)', 'taler-payments') . '"' : ''; ?>
-                            class="regular-text ltr"
-                            autocomplete="new-password"
-                            required
-                        />
-                        <p class="description"><?php echo wp_kses_post(__('Access token is <strong>encrypted</strong> before storage.', 'taler-payments')); ?></p>
-                    </td>
-                </tr>
-            </table>
-            <div class="taler-form-actions">
-                <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'taler-payments'); ?></button>
-                <?php if ($has_token) : ?>
-                    <button
-                        type="submit"
-                        name="taler_token_delete"
-                        value="1"
-                        class="button taler-delete-button"
-                        formnovalidate
-                        onclick="return confirm('<?php echo esc_attr($delete_confirm); ?>');"
-                    ><?php echo esc_html__('Delete', 'taler-payments'); ?></button>
-                <?php endif; ?>
-            </div>
-        </form>
     </div>
     <?php
 }
