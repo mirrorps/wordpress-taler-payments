@@ -28,6 +28,21 @@ use Taler\Api\Order\Dto\PostOrderRequest;
 use Taler\Factory\Factory;
 
 /**
+ * Normalize auth token value for SDK (expects full Authorization header value).
+ */
+function taler_wp_normalize_auth_token(string $token): string
+{
+    $token = trim($token);
+    if ($token === '') {
+        return '';
+    }
+    if (!preg_match('/^(Bearer|Basic)\s+/i', $token)) {
+        return 'Bearer ' . $token;
+    }
+    return $token;
+}
+
+/**
  * Lazily create and reuse a Taler client.
  */
 function taler_wp_client(): \Taler\Taler
@@ -43,14 +58,44 @@ function taler_wp_client(): \Taler\Taler
         }
 
         $token = '';
-        if (!empty($options['taler_token'])) {
+        if (is_array($options) && !empty($options['taler_token'])) {
             $token = taler_decrypt_str((string) $options['taler_token']);
         }
+        $token = taler_wp_normalize_auth_token($token);
 
-        $client = Factory::create([
+        $factoryOptions = [
             'base_url' => $baseUrl,
-            'token'    => $token,
-        ]);
+        ];
+
+        // Access token has priority if both are configured.
+        if ($token !== '') {
+            $factoryOptions['token'] = $token;
+        } else {
+            $username = is_array($options) && !empty($options['ext_username'])
+                ? (string) $options['ext_username']
+                : '';
+            $password = is_array($options) && !empty($options['ext_password'])
+                ? taler_decrypt_str((string) $options['ext_password'])
+                : '';
+            $instance = is_array($options) && !empty($options['taler_instance'])
+                ? (string) $options['taler_instance']
+                : '';
+
+            if ($username !== '' && $password !== '' && $instance !== '') {
+                $factoryOptions['username'] = $username;
+                $factoryOptions['password'] = $password;
+                $factoryOptions['instance'] = $instance;
+                // Request a token scope suitable for order creation/lookup.
+                $factoryOptions['scope'] = 'order-full';
+                $factoryOptions['duration_us'] = 3600_000_000;
+                $factoryOptions['description'] = 'WordPress taler-payments';
+            } else {
+                // No auth configured (SDK will still validate /config).
+                $factoryOptions['token'] = '';
+            }
+        }
+
+        $client = Factory::create($factoryOptions);
     }
 
     return $client;

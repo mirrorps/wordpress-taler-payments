@@ -80,10 +80,16 @@ function taler_register_settings(): void
 }
 
 /**
- * Add a settings error message
+ * Add a settings notice message (error/updated/info), but only once per request/code.
  */
-function taler_add_settings_error_once(string $setting, string $code, string $message, string $type = 'error'): void
+function taler_add_settings_notice_once(string $setting, string $code, string $message, string $type = 'error'): void
 {
+    static $added = [];
+
+    if (isset($added[$setting]) && isset($added[$setting][$code])) {
+        return;
+    }
+
     $existing = get_settings_errors($setting);
     foreach ($existing as $err) {
         if (!empty($err['code']) && $err['code'] === $code) {
@@ -92,6 +98,181 @@ function taler_add_settings_error_once(string $setting, string $code, string $me
     }
 
     add_settings_error($setting, $code, $message, $type);
+    $added[$setting][$code] = true;
+}
+
+/**
+ * Normalize auth token value for SDK (expects full Authorization header value).
+ */
+function taler_normalize_auth_token(string $token): string
+{
+    $token = trim($token);
+    if ($token === '') {
+        return '';
+    }
+    // If user pasted just the opaque token, assume Bearer.
+    if (!preg_match('/^(Bearer|Basic)\s+/i', $token)) {
+        return 'Bearer ' . $token;
+    }
+    return $token;
+}
+
+/**
+ * Perform a lightweight login/config check against the merchant backend and
+ * surface a settings notice (success or error).
+ *
+ * Checks are only run when:
+ * - base_url is set, AND
+ * - (token is set) OR (username+password+instance are set)
+ *
+ * @param array<string, mixed> $options Merged taler_options (already saved shape)
+ */
+function taler_test_merchant_backend_login(array $options, string $mode = 'auto'): void
+{
+    $baseUrl = isset($options['taler_base_url']) ? trim((string) $options['taler_base_url']) : '';
+    if ($baseUrl === '') {
+        return;
+    }
+
+    // Duplicate guard: Prevent duplicate checks/notices (will be not triggered, but it's good to have it in place)
+    static $ran = [];
+    $runKey = $mode . '|' . md5($baseUrl);
+    if (isset($ran[$runKey])) {
+        return;
+    }
+    $ran[$runKey] = true;
+
+    $tokenEnc = isset($options['taler_token']) ? (string) $options['taler_token'] : '';
+    $token = $tokenEnc !== '' ? taler_decrypt_str($tokenEnc) : '';
+    $token = taler_normalize_auth_token($token);
+
+    $username = isset($options['ext_username']) ? trim((string) $options['ext_username']) : '';
+    $passwordEnc = isset($options['ext_password']) ? (string) $options['ext_password'] : '';
+    $password = $passwordEnc !== '' ? taler_decrypt_str($passwordEnc) : '';
+    $instance = isset($options['taler_instance']) ? trim((string) $options['taler_instance']) : '';
+
+    $authLabel = null;
+    $credentialHint = __('credentials', 'taler-payments');
+    $factoryOptions = [
+        'base_url' => $baseUrl,
+    ];
+
+    if ($mode === 'token') {
+        // Token-only mode: do NOT fall back to username/password.
+        if ($token === '') {
+            return;
+        }
+        $authLabel = __('Access Token', 'taler-payments');
+        $credentialHint = __('access token', 'taler-payments');
+        $factoryOptions['token'] = $token;
+    } elseif ($mode === 'userpass') {
+        // Username/password-only mode: do NOT fall back to access token.
+        if ($username === '' || $password === '' || $instance === '') {
+            return;
+        }
+        $authLabel = __('Username & Password', 'taler-payments');
+        $credentialHint = __('username, password, and instance ID', 'taler-payments');
+        $factoryOptions['username'] = $username;
+        $factoryOptions['password'] = $password;
+        $factoryOptions['instance'] = $instance;
+        // Keep the test conservative; readonly is enough to verify auth works.
+        $factoryOptions['scope'] = 'readonly';
+        $factoryOptions['duration_us'] = 3600_000_000;
+        $factoryOptions['description'] = 'WordPress taler-payments settings check';
+    } else {
+        // Auto mode: access token has priority if both are configured.
+        if ($token !== '') {
+            $authLabel = __('Access Token', 'taler-payments');
+            $credentialHint = __('access token', 'taler-payments');
+            $factoryOptions['token'] = $token;
+        } elseif ($username !== '' && $password !== '' && $instance !== '') {
+            $authLabel = __('Username & Password', 'taler-payments');
+            $credentialHint = __('username, password, and instance ID', 'taler-payments');
+            $factoryOptions['username'] = $username;
+            $factoryOptions['password'] = $password;
+            $factoryOptions['instance'] = $instance;
+            // Keep the test conservative; readonly is enough to verify auth works.
+            $factoryOptions['scope'] = 'readonly';
+            $factoryOptions['duration_us'] = 3600_000_000;
+            $factoryOptions['description'] = 'WordPress taler-payments settings check';
+        } else {
+            return;
+        }
+    }
+
+    try {
+        $taler = \Taler\Factory\Factory::create($factoryOptions);
+        $report = $taler->configCheck();
+
+        if (!is_array($report) || empty($report['ok'])) {
+            // Extract most useful failure hint.
+            $step = 'auth';
+            $status = null;
+            $error = null;
+
+            if (isset($report['config']) && is_array($report['config']) && empty($report['config']['ok'])) {
+                $step = 'config';
+                $status = $report['config']['status'] ?? null;
+                $error = $report['config']['error'] ?? null;
+            } elseif (isset($report['instance']) && is_array($report['instance']) && empty($report['instance']['ok'])) {
+                $step = 'instance';
+                $status = $report['instance']['status'] ?? null;
+                $error = $report['instance']['error'] ?? null;
+            } elseif (isset($report['auth']) && is_array($report['auth']) && empty($report['auth']['ok'])) {
+                $step = 'auth';
+                $status = $report['auth']['status'] ?? null;
+                $error = $report['auth']['error'] ?? null;
+            }
+
+            $statusText = is_int($status) ? (' (HTTP ' . $status . ')') : '';
+            $errorText = is_string($error) && $error !== '' ? (' ' . $error) : '';
+
+            taler_add_settings_notice_once(
+                'taler_options',
+                'taler_backend_login_failed',
+                sprintf(
+                    /* translators: 1: auth method label, 2: failing step, 3: optional status text, 4: optional error slug */
+                    __('Merchant backend login test failed (error: %1$s): %2$s%3$s.%4$s', 'taler-payments'),
+                    $authLabel,
+                    $step,
+                    $statusText,
+                    $errorText
+                ),
+                'error'
+            );
+            return;
+        }
+
+        taler_add_settings_notice_once(
+            'taler_options',
+            'taler_backend_login_ok',
+            sprintf(
+                __('Merchant backend login test successful (%s).', 'taler-payments'),
+                $authLabel
+            ),
+            'updated'
+        );
+    } catch (\InvalidArgumentException $e) {
+        taler_add_settings_notice_once(
+            'taler_options',
+            'taler_backend_login_invalid',
+            __('Merchant backend login test failed: invalid configuration (is this a Taler Merchant Backend base URL?).', 'taler-payments'),
+            'error'
+        );
+    } catch (\Throwable $e) {
+        // Avoid leaking sensitive info; keep message generic.
+        taler_add_settings_notice_once(
+            'taler_options',
+            'taler_backend_login_exception',
+            sprintf(
+                /* translators: 1: auth method label, 2: credentials hint */
+                __('Merchant backend login test failed (error: %1$s). Please verify Base URL and %2$s.', 'taler-payments'),
+                (string) $authLabel,
+                $credentialHint
+            ),
+            'error'
+        );
+    }
 }
 
 /**
@@ -103,7 +284,7 @@ function taler_options_sanitize($input): array
 {
     if (!current_user_can('manage_options')) {
         // If this ever triggers, WordPress will still block saving, but this keeps the callback safe.
-        taler_add_settings_error_once(
+        taler_add_settings_notice_once(
             'taler_options',
             'taler_options_permission_denied',
             __('You do not have permission to do this.', 'taler-payments'),
@@ -123,7 +304,7 @@ function taler_options_sanitize($input): array
         $is_delete = !empty($_POST['taler_baseurl_delete']);
         if ($is_delete) {
             unset($new['taler_base_url']);
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_baseurl_deleted',
                 __('Base URL deleted.', 'taler-payments'),
@@ -136,7 +317,7 @@ function taler_options_sanitize($input): array
         $base_url = trim($base_url);
 
         if ($base_url === '') {
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_baseurl_required',
                 __('Please provide a base URL.', 'taler-payments'),
@@ -150,7 +331,7 @@ function taler_options_sanitize($input): array
         $scheme = is_array($parsed) && isset($parsed['scheme']) ? strtolower((string) $parsed['scheme']) : '';
 
         if ($base_url === '' || $scheme !== 'https') {
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_baseurl_invalid',
                 __('Base URL must start with https://', 'taler-payments'),
@@ -160,7 +341,8 @@ function taler_options_sanitize($input): array
         }
 
         $new['taler_base_url'] = $base_url;
-
+        // If credentials are present, verify we can reach/authenticate.
+        taler_test_merchant_backend_login($new, 'auto');
         return $new;
     }
 
@@ -168,8 +350,8 @@ function taler_options_sanitize($input): array
         // Deleting credentials should bypass HTML required validation via `formnovalidate` on the delete button.
         $is_delete = !empty($_POST['taler_userpass_delete']);
         if ($is_delete) {
-            unset($new['ext_username'], $new['ext_password']);
-            taler_add_settings_error_once(
+            unset($new['ext_username'], $new['ext_password'], $new['taler_instance']);
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_userpass_deleted',
                 __('Username and password deleted.', 'taler-payments'),
@@ -180,9 +362,10 @@ function taler_options_sanitize($input): array
 
         $username = isset($input['ext_username']) ? sanitize_text_field(wp_unslash($input['ext_username'])) : '';
         $password = isset($input['ext_password']) ? (string) wp_unslash($input['ext_password']) : '';
+        $instance = isset($input['taler_instance']) ? sanitize_text_field(wp_unslash($input['taler_instance'])) : '';
 
         if ($username === '') {
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_username_required',
                 __('Please provide a username.', 'taler-payments'),
@@ -191,9 +374,19 @@ function taler_options_sanitize($input): array
             return $old;
         }
 
+        if ($instance === '') {
+            taler_add_settings_notice_once(
+                'taler_options',
+                'taler_instance_required',
+                __('Please provide an instance ID.', 'taler-payments'),
+                'error'
+            );
+            return $old;
+        }
+
         $already_has_password = !empty($old['ext_password']);
         if ($password === '' && !$already_has_password) {
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_password_required',
                 __('Please provide a password.', 'taler-payments'),
@@ -203,10 +396,11 @@ function taler_options_sanitize($input): array
         }
 
         $new['ext_username'] = $username;
+        $new['taler_instance'] = $instance;
         if ($password !== '') {
             $encrypted_password = taler_encrypt_str($password);
             if ($encrypted_password === '') {
-                taler_add_settings_error_once(
+                taler_add_settings_notice_once(
                     'taler_options',
                     'taler_userpass_encrypt_failed',
                     __('Could not encrypt password. Credentials were not saved.', 'taler-payments'),
@@ -217,6 +411,8 @@ function taler_options_sanitize($input): array
             $new['ext_password'] = $encrypted_password;
         }
 
+        // If base URL is present, verify we can reach/authenticate.
+        taler_test_merchant_backend_login($new, 'userpass');
         return $new;
     }
 
@@ -224,7 +420,7 @@ function taler_options_sanitize($input): array
         $is_delete = !empty($_POST['taler_token_delete']);
         if ($is_delete) {
             unset($new['taler_token']);
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_token_deleted',
                 __('Access token deleted.', 'taler-payments'),
@@ -236,7 +432,7 @@ function taler_options_sanitize($input): array
         $token = isset($input['taler_token']) ? (string) wp_unslash($input['taler_token']) : '';
 
         if ($token === '') {
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_token_required',
                 __('Please provide an access token.', 'taler-payments'),
@@ -247,7 +443,7 @@ function taler_options_sanitize($input): array
 
         $encrypted_token = taler_encrypt_str($token);
         if ($encrypted_token === '') {
-            taler_add_settings_error_once(
+            taler_add_settings_notice_once(
                 'taler_options',
                 'taler_token_encrypt_failed',
                 __('Could not encrypt access token. Token was not saved.', 'taler-payments'),
@@ -257,6 +453,9 @@ function taler_options_sanitize($input): array
         }
 
         $new['taler_token'] = $encrypted_token;
+        
+        // If base URL is present, verify we can reach/authenticate.
+        taler_test_merchant_backend_login($new, 'token');
         return $new;
     }
 
@@ -269,11 +468,13 @@ function taler_settings_page() {
 
     $saved_username = $options['ext_username'] ?? '';
     $username = $saved_username;
+    $saved_instance = $options['taler_instance'] ?? '';
+    $instance = (string) $saved_instance;
     // Never pre-fill stored secrets in password fields.
     $password = '';
     $token_value = '';
 
-    $has_userpass = ($saved_username !== '') || !empty($options['ext_password']);
+    $has_userpass = ($saved_username !== '') || !empty($options['ext_password']) || ($instance !== '');
     $has_token = !empty($options['taler_token']);
     $saved_base_url = isset($options['taler_base_url']) ? (string) $options['taler_base_url'] : '';
     $has_base_url = ($saved_base_url !== '');
@@ -283,24 +484,28 @@ function taler_settings_page() {
     <div class="wrap">
         <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
-        <h2><?php echo esc_html__('Taler Merchant Backend', 'taler-payments'); ?></h2>
+        
         <div class="taler-settings-group">
+            <h2><?php echo esc_html__('Taler Merchant Backend', 'taler-payments'); ?></h2>
+
             <div class="notice notice-info inline">
                 <p><?php
                     echo wp_kses_post(sprintf(
-                        __('<strong>Security:</strong> Passwords and tokens are <strong>encrypted</strong> before database storage.', 'taler-payments')
+                        __('<strong>Security:</strong> Passwords and tokens are first <strong>encrypted</strong> and then stored in the database.', 'taler-payments')
                     ));
                 ?></p>
             </div>
 
             <div class="notice notice-info inline">
                 <p><?php echo wp_kses_post(sprintf(
-                    __('Provide either <strong>%1$s</strong> or an <strong>%2$s</strong> to access <strong>Taler Merchant Backend</strong>. If both are provided, the <strong>%2$s</strong> is used with priority.', 'taler-payments'),
+                    __('To access the <strong>Taler Merchant Backend</strong> provide either <strong>%1$s</strong> or an <strong>%2$s</strong>. If both are supplied, the <strong>%2$s</strong> takes priority.', 'taler-payments'),
                     esc_html__('Username & Password', 'taler-payments'),
                     esc_html__('Access Token', 'taler-payments')
                 )); ?>
                 </p>
             </div>
+
+            <hr class="taler-divider" />
 
             <h3 class="taler-settings-subheading"><?php echo esc_html__('Base URL', 'taler-payments'); ?></h3>
             <form id="taler-baseurl-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
@@ -318,7 +523,12 @@ function taler_settings_page() {
                                 placeholder="https://backend.demo.taler.net/instances/sandbox"
                                 required
                             />
-                            <p class="description"><?php echo esc_html__('Taler Merchant Backend Insance URL, must start with https://', 'taler-payments'); ?></p>
+                            <p class="description">
+                                <?php echo wp_kses_post(__(
+                                    'Important: the Base URL must include the instance path (e.g. /instances/<instance-id>) and must start with https://.<br>Example: https://backend.demo.taler.net/instances/sandbox', 
+                                    'taler-payments'
+                                )); ?>
+                            </p>
                         </td>
                     </tr>
                 </table>
@@ -344,10 +554,29 @@ function taler_settings_page() {
                 <?php settings_fields('taler_userpass_group'); ?>
                 <table class="form-table" role="presentation">
                     <tr>
+                        <th scope="row"><label for="taler-instance"><?php echo esc_html__('Instance ID *', 'taler-payments'); ?></label></th>
+                        <td>
+                            <input
+                                type="text"
+                                id="taler-instance"
+                                name="taler_options[taler_instance]"
+                                value="<?php echo esc_attr($instance); ?>"
+                                class="regular-text"
+                                required
+                            />
+                            <p class="description">
+                                <?php echo wp_kses_post(__(
+                                    'Required when authenticating with Username & Password<br>The instance ID specifies which Taler Merchant Backend instance to authenticate against.', 
+                                    'taler-payments'
+                                )); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row"><label for="taler-ext-username"><?php echo esc_html__('Username *', 'taler-payments'); ?></label></th>
                         <td>
                             <input type="text" id="taler-ext-username" name="taler_options[ext_username]" value="<?php echo esc_attr($username); ?>" class="regular-text" required />
-                            <p class="description"><?php echo esc_html__('Username/API key for Taler external system.', 'taler-payments'); ?></p>
+                            <p class="description"><?php echo esc_html__('Username for the Taler Merchant Backend instance.', 'taler-payments'); ?></p>
                         </td>
                     </tr>
                     <tr>
@@ -365,7 +594,7 @@ function taler_settings_page() {
                             />
                             <p class="description">
                                 <?php echo wp_kses_post(__(
-                                    'Password will be <strong>encrypted</strong> before storage.',
+                                    'Password for the Taler Merchant Backend instance.<br>The password will be first <strong>encrypted</strong> and then stored in the database.',
                                     'taler-payments'
                                 )); ?>
                                 <?php if ($has_userpass) : ?>
@@ -409,7 +638,7 @@ function taler_settings_page() {
                                 autocomplete="new-password"
                                 required
                             />
-                            <p class="description"><?php echo wp_kses_post(__('Access token is <strong>encrypted</strong> before storage.', 'taler-payments')); ?></p>
+                            <p class="description"><?php echo wp_kses_post(__('Access token for the Taler Merchant Backend.<br>Save the full value as used in the HTTP <code>Authorization</code> header (including the prefix). Example: <code>Bearer secret-token:sandbox</code>.<br>The access token will be first <strong>encrypted</strong> and then stored in the database.', 'taler-payments')); ?></p>
                         </td>
                     </tr>
                 </table>
@@ -427,6 +656,7 @@ function taler_settings_page() {
                     <?php endif; ?>
                 </div>
             </form>
+            <hr class="taler-divider" />
         </div>
     </div>
     <?php
