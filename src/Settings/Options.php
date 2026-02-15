@@ -11,9 +11,9 @@ final class Options
     /**
      * @return array<string, mixed>
      */
-    public static function get(): array
+    public static function get(?string $option = null): array
     {
-        $options = get_option(self::OPTION_NAME);
+        $options = get_option($option ?? self::OPTION_NAME);
         return is_array($options) ? $options : [];
     }
 }

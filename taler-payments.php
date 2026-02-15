@@ -101,6 +101,8 @@ function taler_wp_ajax_create_order(): void
         }
         wp_send_json_error(['message' => 'Taler payment temporarily unavailable.'], 502);
     } catch (\Throwable $e) {
+        error_log('taler-payments: runtime error: ' . $e->getMessage());
+        error_log($e->getTraceAsString());
         wp_send_json_error(['message' => 'Taler runtime error.'], 500);
     }
 }

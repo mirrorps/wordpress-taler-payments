@@ -11,26 +11,36 @@ use TalerPayments\Settings\Options;
 final class Taler
 {
     private ?\Taler\Taler $client = null;
-    /** @var callable():array<string,mixed> */
-    private readonly callable $optionsGetter;
-    /** @var callable(string):string */
-    private readonly callable $decrypt;
-    /** @var null|callable(array<string,mixed>):\Taler\Taler */
-    private readonly mixed $clientFactory;
+    
+    /** @var \Closure():array<string,mixed> */
+    private readonly \Closure $optionsGetter;
+    
+    /** @var \Closure(string):string */
+    private readonly \Closure $decrypt;
 
     /**
+     * @param null|array<string,mixed> $factoryOptions
      * @param null|callable():array<string,mixed> $optionsGetter
      * @param null|callable(string):string $decrypt
-     * @param null|callable(array<string,mixed>):\Taler\Taler $clientFactory
      */
     public function __construct(
+        private readonly ?array $factoryOptions = null,
         ?callable $optionsGetter = null,
         ?callable $decrypt = null,
-        mixed $clientFactory = null,
     ) {
-        $this->optionsGetter = $optionsGetter ?? [Options::class, 'get'];
-        $this->decrypt = $decrypt ?? [Crypto::class, 'decryptString'];
-        $this->clientFactory = $clientFactory;
+        $this->optionsGetter = \Closure::fromCallable($optionsGetter ?? [Options::class, 'get']);
+        $this->decrypt = \Closure::fromCallable($decrypt ?? [Crypto::class, 'decryptString']);
+    }
+
+    /**
+     * Create a Taler client from factory options.
+     *
+     * @param array<string,mixed> $factoryOptions
+     * @return \Taler\Taler
+     */
+    public static function create(array $factoryOptions): \Taler\Taler
+    {
+        return (new self($factoryOptions))->client();
     }
 
     /**
@@ -47,6 +57,11 @@ final class Taler
     public function client(): \Taler\Taler
     {
         if ($this->client !== null) {
+            return $this->client;
+        }
+
+        if($this->factoryOptions) {
+            $this->client = Factory::create($this->factoryOptions);
             return $this->client;
         }
 
@@ -88,8 +103,7 @@ final class Taler
             }
         }
 
-        $factory = $this->clientFactory ?? [Factory::class, 'create'];
-        $this->client = $factory($factoryOptions);
+        $this->client = Factory::create($factoryOptions);
         return $this->client;
     }
 

@@ -110,7 +110,7 @@ final class MerchantBackendChecker
         }
 
         try {
-            $taler = \Taler\Factory\Factory::create($factoryOptions);
+            $taler = \TalerPayments\Services\Taler::create($factoryOptions);
             $report = $taler->configCheck();
 
             if (!is_array($report) || empty($report['ok'])) {
