@@ -8,15 +8,27 @@
  * Author: mirrorps
  */
 
-if (!defined( 'ABSPATH')){
+if (!defined('ABSPATH')) {
 	exit;
 }
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-require_once plugin_dir_path(__FILE__) . 'includes/helpers.php';
+if (is_admin()) {
+    add_action('plugins_loaded', static function (): void {
+        static $booted = false;
+        if ($booted) {
+            return;
+        }
+        $booted = true;
 
-include_once plugin_dir_path(__FILE__) . 'includes/admin-taler-settings.php';
+        $notices = new \TalerPayments\Services\SettingsNotices();
+        $checker = new \TalerPayments\Services\MerchantBackendChecker($notices);
+        $sanitizer = new \TalerPayments\Settings\Sanitizer($notices, $checker);
+        $settingsPage = new \TalerPayments\Admin\SettingsPage($sanitizer);
+        $settingsPage->hooks();
+    });
+}
 
 define('TALER_PAYMENTS_VERSION', '0.1.0');
 
@@ -26,6 +38,7 @@ use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
 use Taler\Api\Order\Dto\OrderV0;
 use Taler\Api\Order\Dto\PostOrderRequest;
 use Taler\Factory\Factory;
+use TalerPayments\Helpers\Crypto;
 
 /**
  * Normalize auth token value for SDK (expects full Authorization header value).
@@ -59,7 +72,7 @@ function taler_wp_client(): \Taler\Taler
 
         $token = '';
         if (is_array($options) && !empty($options['taler_token'])) {
-            $token = taler_decrypt_str((string) $options['taler_token']);
+            $token = Crypto::decryptString((string) $options['taler_token']);
         }
         $token = taler_wp_normalize_auth_token($token);
 
@@ -75,7 +88,7 @@ function taler_wp_client(): \Taler\Taler
                 ? (string) $options['ext_username']
                 : '';
             $password = is_array($options) && !empty($options['ext_password'])
-                ? taler_decrypt_str((string) $options['ext_password'])
+                ? Crypto::decryptString((string) $options['ext_password'])
                 : '';
             $instance = is_array($options) && !empty($options['taler_instance'])
                 ? (string) $options['taler_instance']
