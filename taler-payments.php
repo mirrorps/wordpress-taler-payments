@@ -14,6 +14,13 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+define('TALER_PAYMENTS_VERSION', '0.1.1');
+
+use Taler\Api\Order\Dto\Amount;
+use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\Order\Dto\OrderV0;
+use Taler\Api\Order\Dto\PostOrderRequest;
+
 if (is_admin()) {
     add_action('plugins_loaded', static function (): void {
         static $booted = false;
@@ -29,14 +36,6 @@ if (is_admin()) {
         $settingsPage->hooks();
     });
 }
-
-define('TALER_PAYMENTS_VERSION', '0.1.0');
-
-
-use Taler\Api\Order\Dto\Amount;
-use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
-use Taler\Api\Order\Dto\OrderV0;
-use Taler\Api\Order\Dto\PostOrderRequest;
 
 /**
  * Get the plugin Taler service.
@@ -190,6 +189,7 @@ function taler_wp_render_pay_button($atts): string
         [
             'amount'  => 'KUDOS:1.00',
             'summary' => 'Donation',
+            'text'    => 'Pay with Taler',
         ],
         $atts,
         'taler_pay_button'
@@ -197,14 +197,16 @@ function taler_wp_render_pay_button($atts): string
 
     $amount  = sanitize_text_field($atts['amount']);
     $summary = sanitize_text_field($atts['summary']);
+    $text    = sanitize_text_field($atts['text']);
 
     taler_wp_mark_shortcode_used();
     taler_wp_enqueue_assets();
 
     return sprintf(
-        '<a href="#" class="taler-pay-button" data-taler-amount="%s" data-taler-summary="%s" role="button" aria-haspopup="dialog">Pay with Taler</a>',
+        '<a href="#" class="taler-pay-button" data-taler-amount="%s" data-taler-summary="%s" role="button" aria-haspopup="dialog">%s</a>',
         esc_attr($amount),
-        esc_attr($summary)
+        esc_attr($summary),
+        esc_html($text)
     );
 }
 

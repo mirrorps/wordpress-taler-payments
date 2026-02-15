@@ -28,6 +28,7 @@ Parameters:
 
 - `amount`: an amount in the form `CURRENCY:VALUE` (must be supported by your exchange)
 - `summary`: order summary shown to the payer
+- `text`: button call-to-action text (defaults to `Pay with Taler`)
 
 ### Configuration
 
