@@ -37,81 +37,17 @@ use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
 use Taler\Api\Order\Dto\OrderV0;
 use Taler\Api\Order\Dto\PostOrderRequest;
-use Taler\Factory\Factory;
-use TalerPayments\Helpers\Crypto;
 
 /**
- * Normalize auth token value for SDK (expects full Authorization header value).
+ * Get the plugin Taler service.
  */
-function taler_wp_normalize_auth_token(string $token): string
+function taler_wp_taler_service(): \TalerPayments\Services\Taler
 {
-    $token = trim($token);
-    if ($token === '') {
-        return '';
+    static $service = null;
+    if ($service === null) {
+        $service = new \TalerPayments\Services\Taler();
     }
-    if (!preg_match('/^(Bearer|Basic)\s+/i', $token)) {
-        return 'Bearer ' . $token;
-    }
-    return $token;
-}
-
-/**
- * Lazily create and reuse a Taler client.
- */
-function taler_wp_client(): \Taler\Taler
-{
-    static $client = null;
-
-    if ($client === null) {
-        $options = get_option('taler_options');
-
-        $baseUrl = '';
-        if (is_array($options) && !empty($options['taler_base_url'])) {
-            $baseUrl = (string) $options['taler_base_url'];
-        }
-
-        $token = '';
-        if (is_array($options) && !empty($options['taler_token'])) {
-            $token = Crypto::decryptString((string) $options['taler_token']);
-        }
-        $token = taler_wp_normalize_auth_token($token);
-
-        $factoryOptions = [
-            'base_url' => $baseUrl,
-        ];
-
-        // Access token has priority if both are configured.
-        if ($token !== '') {
-            $factoryOptions['token'] = $token;
-        } else {
-            $username = is_array($options) && !empty($options['ext_username'])
-                ? (string) $options['ext_username']
-                : '';
-            $password = is_array($options) && !empty($options['ext_password'])
-                ? Crypto::decryptString((string) $options['ext_password'])
-                : '';
-            $instance = is_array($options) && !empty($options['taler_instance'])
-                ? (string) $options['taler_instance']
-                : '';
-
-            if ($username !== '' && $password !== '' && $instance !== '') {
-                $factoryOptions['username'] = $username;
-                $factoryOptions['password'] = $password;
-                $factoryOptions['instance'] = $instance;
-                // Request a token scope suitable for order creation/lookup.
-                $factoryOptions['scope'] = 'order-full';
-                $factoryOptions['duration_us'] = 3600_000_000;
-                $factoryOptions['description'] = 'WordPress taler-payments';
-            } else {
-                // No auth configured (SDK will still validate /config).
-                $factoryOptions['token'] = '';
-            }
-        }
-
-        $client = Factory::create($factoryOptions);
-    }
-
-    return $client;
+    return $service;
 }
 
 /**
@@ -119,8 +55,9 @@ function taler_wp_client(): \Taler\Taler
  */
 function taler_wp_create_order_pay_uri(string $amount, string $summary): ?string
 {
-    $taler       = taler_wp_client();
-    $orderClient = $taler->order();
+    $orderClient = taler_wp_taler_service()
+        ->client()
+        ->order();
 
     $order = new OrderV0(
         summary: sanitize_text_field($summary),
