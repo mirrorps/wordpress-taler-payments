@@ -2,6 +2,7 @@
 namespace TalerPayments\Settings;
 
 use TalerPayments\Helpers\Crypto;
+use TalerPayments\Services\MerchantAuthConfigurator;
 use TalerPayments\Services\MerchantBackendChecker;
 use TalerPayments\Services\SettingsNotices;
 
@@ -85,7 +86,7 @@ final class Sanitizer
             $new['taler_base_url'] = $base_url;
 
             // If credentials are present, verify we can reach/authenticate.
-            $this->checker->testLogin($new, 'auto');
+            $this->checker->testLogin($new, MerchantAuthConfigurator::MODE_AUTO);
             return $new;
         }
 
@@ -155,7 +156,7 @@ final class Sanitizer
             }
 
             // If base URL is present, verify we can reach/authenticate.
-            $this->checker->testLogin($new, 'userpass');
+            $this->checker->testLogin($new, MerchantAuthConfigurator::MODE_USERPASS);
             return $new;
         }
 
@@ -198,7 +199,7 @@ final class Sanitizer
             $new['taler_token'] = $encrypted_token;
 
             // If base URL is present, verify we can reach/authenticate.
-            $this->checker->testLogin($new, 'token');
+            $this->checker->testLogin($new, MerchantAuthConfigurator::MODE_TOKEN);
             return $new;
         }
 
