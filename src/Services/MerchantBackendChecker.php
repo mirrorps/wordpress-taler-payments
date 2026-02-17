@@ -28,11 +28,11 @@ final class MerchantBackendChecker
      *
      * @param array<string, mixed> $options Merged taler_options (already saved shape)
      */
-    public function testLogin(array $options, string $mode = MerchantAuthConfigurator::MODE_AUTO): void
+    public function testLogin(array $options, string $mode = MerchantAuthConfigurator::MODE_AUTO): bool
     {
         $context = $this->authConfigurator->buildLoginCheckContext($options, $mode);
         if ($context === null) {
-            return;
+            return true;
         }
 
         $factoryOptions = $context->factoryOptions;
@@ -41,7 +41,7 @@ final class MerchantBackendChecker
         // Duplicate guard: prevent duplicate checks/notices per request.
         $runKey = $mode . '|' . md5(json_encode($factoryOptions->toArray()));
         if (isset($this->ran[$runKey])) {
-            return;
+            return true;
         }
 
         $this->ran[$runKey] = true;
@@ -51,7 +51,7 @@ final class MerchantBackendChecker
 
             if (!is_array($report) || empty($report['ok'])) {
                 $this->addFailureNotice($authLabel, $report);
-                return;
+                return false;
             }
 
             $this->notices->addOnce(
@@ -63,6 +63,7 @@ final class MerchantBackendChecker
                 ),
                 'updated'
             );
+            return true;
         } catch (\InvalidArgumentException $e) {
             $this->notices->addOnce(
                 'taler_options',
@@ -70,6 +71,7 @@ final class MerchantBackendChecker
                 __('Merchant backend login test failed: invalid configuration (is this a Taler Merchant Backend base URL?).', 'taler-payments'),
                 'error'
             );
+            return false;
         } catch (\Throwable $e) {
             // Avoid leaking sensitive info; keep message generic.
             $this->notices->addOnce(
@@ -83,6 +85,7 @@ final class MerchantBackendChecker
                 ),
                 'error'
             );
+            return false;
         }
     }
 

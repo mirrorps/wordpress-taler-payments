@@ -31,8 +31,9 @@ if (is_admin()) {
 
         $notices = new \TalerPayments\Services\SettingsNotices();
         $checker = new \TalerPayments\Services\MerchantBackendChecker($notices);
-        $sanitizer = new \TalerPayments\Settings\Sanitizer($notices, $checker);
-        $settingsPage = new \TalerPayments\Admin\SettingsPage($sanitizer);
+        $sanitizer = new \TalerPayments\Settings\Sanitizer($notices);
+        $settingsSaveService = new \TalerPayments\Settings\SettingsSaveService($sanitizer, $checker);
+        $settingsPage = new \TalerPayments\Admin\SettingsPage($settingsSaveService);
         $settingsPage->hooks();
     });
 }

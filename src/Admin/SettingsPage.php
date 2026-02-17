@@ -2,7 +2,7 @@
 namespace TalerPayments\Admin;
 
 use TalerPayments\Settings\Options;
-use TalerPayments\Settings\Sanitizer;
+use TalerPayments\Settings\SettingsSaveService;
 
 /**
  * Admin settings page wiring + rendering.
@@ -10,7 +10,7 @@ use TalerPayments\Settings\Sanitizer;
 final class SettingsPage
 {
     public function __construct(
-        private readonly Sanitizer $sanitizer,
+        private readonly SettingsSaveService $saveService,
     ) {
     }
 
@@ -76,7 +76,8 @@ final class SettingsPage
      */
     public function sanitizeOptions($input): array
     {
-        return $this->sanitizer->sanitize($input);
+        // dd($_POST, $input);
+        return $this->saveService->sanitizeForSave($input, $_POST, Options::get());
     }
 
     public function render(): void
