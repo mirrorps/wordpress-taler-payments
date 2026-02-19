@@ -106,7 +106,7 @@ final class PublicPresentation
                 'summary' => PublicDefaults::SUMMARY,
             ],
             'i18n' => [
-                'title' => __('GNU Taler Payment', 'taler-payments'),
+                'title' => __('Taler Payment', 'taler-payments'),
                 'creatingOrder' => __('Preparing your payment…', 'taler-payments'),
                 'payInBrowser' => __('Pay with Taler wallet in the browser', 'taler-payments'),
                 'walletInstallText' => __('To pay in the browser, the Taler Wallet extension must be installed.', 'taler-payments'),
@@ -187,7 +187,7 @@ final class PublicPresentation
                     </div>
                 </div>
 
-                <div class="taler-modal__qr">
+                <div class="taler-modal__qr" style="text-align: center">
                     <div class="taler-modal__qr-label" id="taler-modal-qr-help"><?php echo esc_html__('Or scan this QR code with your mobile wallet:', 'taler-payments'); ?></div>
                     <div class="taler-modal__qr-box" id="taler-modal-qr"></div>
                 </div>
