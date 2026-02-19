@@ -160,8 +160,10 @@
 
       e.preventDefault();
 
-      var amount = link.getAttribute('data-taler-amount') || 'KUDOS:1.00';
-      var summary = link.getAttribute('data-taler-summary') || 'Donation';
+      var defaultAmount = TalerPayments.defaults.amount || 'KUDOS:1.00';
+      var defaultSummary = TalerPayments.defaults.summary || 'Donation';
+      var amount = link.getAttribute('data-taler-amount') || defaultAmount;
+      var summary = link.getAttribute('data-taler-summary') || defaultSummary;
 
       setText(amountEl, amount);
       setText(summaryEl, summary);
@@ -187,7 +189,7 @@
           if (typeof window.QRCode !== 'function') {
             var msg = document.createElement('div');
             msg.className = 'taler-modal__errorInline';
-            msg.textContent = 'QR generator not available.';
+            msg.textContent = TalerPayments.i18n.qrUnavailable || 'QR generator not available.';
             if (qrBox) qrBox.appendChild(msg);
             return;
           }

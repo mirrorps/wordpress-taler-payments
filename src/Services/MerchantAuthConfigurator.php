@@ -76,6 +76,29 @@ final class MerchantAuthConfigurator
     }
 
     /**
+     * Build runtime user/pass factory options.
+     *
+     * Returns null when base URL or user/pass credentials are incomplete.
+     *
+     * @param array<string,mixed> $options
+     */
+    public function buildRuntimeUserPassFactoryOptions(array $options): ?TalerFactoryOptions
+    {
+        $parsed = $this->parseSettings($options);
+        if ($parsed['base_url'] === '' || !$this->hasUserPassCredentials($parsed)) {
+            return null;
+        }
+
+        $factoryOptions = TalerFactoryOptions::withBaseUrl($parsed['base_url']);
+        return $this->addUserPassAuth(
+            $factoryOptions,
+            $parsed,
+            self::USERPASS_SCOPE_RUNTIME,
+            self::DESCRIPTION_RUNTIME
+        );
+    }
+
+    /**
      * Build login check options with selected auth method metadata.
      *
      * @param array<string,mixed> $options
