@@ -2,6 +2,7 @@
 namespace TalerPayments\Bootstrap;
 
 use TalerPayments\Public\AjaxOrderController;
+use TalerPayments\Public\AjaxOrderStatusController;
 use TalerPayments\Public\Input\ArrayInput;
 use TalerPayments\Public\OrderService;
 use TalerPayments\Public\PublicPresentation;
@@ -26,6 +27,21 @@ final class PublicWiringFactory
         return new AjaxOrderController(
             $orderService,
             new AmountValidator(),
+            new ArrayInput($_POST),
+            new WordPressRequestSecurity(),
+            new JsonResponder()
+        );
+    }
+
+    public function createAjaxOrderStatusController(): AjaxOrderStatusController
+    {
+        $orderService = new OrderService(
+            new Taler(),
+            new MerchantAuthConfigurator()
+        );
+
+        return new AjaxOrderStatusController(
+            $orderService,
             new ArrayInput($_POST),
             new WordPressRequestSecurity(),
             new JsonResponder()

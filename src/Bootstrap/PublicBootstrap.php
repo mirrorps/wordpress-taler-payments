@@ -2,6 +2,7 @@
 namespace TalerPayments\Bootstrap;
 
 use TalerPayments\Public\AjaxOrderController;
+use TalerPayments\Public\AjaxOrderStatusController;
 
 /**
  * Registers public-facing plugin wiring.
@@ -9,6 +10,7 @@ use TalerPayments\Public\AjaxOrderController;
 final class PublicBootstrap
 {
     private ?AjaxOrderController $ajaxController = null;
+    private ?AjaxOrderStatusController $ajaxOrderStatusController = null;
     private readonly PublicWiringFactory $wiringFactory;
 
     public function __construct(
@@ -23,6 +25,8 @@ final class PublicBootstrap
     {
         add_action('wp_ajax_taler_wp_create_order', [$this, 'handleAjaxCreateOrder']);
         add_action('wp_ajax_nopriv_taler_wp_create_order', [$this, 'handleAjaxCreateOrder']);
+        add_action('wp_ajax_taler_wp_check_order_status', [$this, 'handleAjaxCheckOrderStatus']);
+        add_action('wp_ajax_nopriv_taler_wp_check_order_status', [$this, 'handleAjaxCheckOrderStatus']);
 
         if (is_admin()) {
             return;
@@ -43,6 +47,11 @@ final class PublicBootstrap
         $this->ajaxController()->handle();
     }
 
+    public function handleAjaxCheckOrderStatus(): void
+    {
+        $this->ajaxOrderStatusController()->handle();
+    }
+
     private function ajaxController(): AjaxOrderController
     {
         if ($this->ajaxController !== null) {
@@ -52,5 +61,16 @@ final class PublicBootstrap
         $this->ajaxController = $this->wiringFactory->createAjaxOrderController();
 
         return $this->ajaxController;
+    }
+
+    private function ajaxOrderStatusController(): AjaxOrderStatusController
+    {
+        if ($this->ajaxOrderStatusController !== null) {
+            return $this->ajaxOrderStatusController;
+        }
+
+        $this->ajaxOrderStatusController = $this->wiringFactory->createAjaxOrderStatusController();
+
+        return $this->ajaxOrderStatusController;
     }
 }

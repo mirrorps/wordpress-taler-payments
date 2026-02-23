@@ -99,6 +99,8 @@ final class PublicPresentation
         wp_localize_script('taler-payments', 'TalerPayments', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('taler_wp_create_order'),
+            'nonceCreateOrder' => wp_create_nonce('taler_wp_create_order'),
+            'nonceCheckOrderStatus' => wp_create_nonce('taler_wp_check_order_status'),
             'walletInfoUrl' => 'https://www.taler.net/en/wallet.html',
             'qrCodeLibUrl' => $base . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js?ver=' . rawurlencode((string) $qrcodeVersion),
             'defaults' => [
@@ -112,6 +114,12 @@ final class PublicPresentation
                 'walletInstallText' => __('To pay in the browser, the Taler Wallet extension must be installed.', 'taler-payments'),
                 'walletInstallLinkText' => __('Get the wallet', 'taler-payments'),
                 'qrHelp' => __('Or scan this QR code with your mobile wallet:', 'taler-payments'),
+                'checkPaymentStatus' => __('Check payment status', 'taler-payments'),
+                'checkPaymentStatusHelp' => __('After you finish the payment in your wallet, click this button to refresh payment status.', 'taler-payments'),
+                'checkingPaymentStatus' => __('Checking payment status...', 'taler-payments'),
+                'paymentCompleted' => __('Payment received. Thank you!', 'taler-payments'),
+                'paymentNotYetCompleted' => __('Payment not confirmed yet. Please complete payment and try again.', 'taler-payments'),
+                'paymentStatusUnavailable' => __('Order is still being prepared. Please try checking again in a moment.', 'taler-payments'),
                 'qrUnavailable' => __('QR generator not available.', 'taler-payments'),
                 'errorGeneric' => __('Payment temporarily unavailable. Please try again.', 'taler-payments'),
                 'close' => __('Close', 'taler-payments'),
@@ -190,6 +198,14 @@ final class PublicPresentation
                 <div class="taler-modal__qr" style="text-align: center">
                     <div class="taler-modal__qr-label" id="taler-modal-qr-help"><?php echo esc_html__('Or scan this QR code with your mobile wallet:', 'taler-payments'); ?></div>
                     <div class="taler-modal__qr-box" id="taler-modal-qr"></div>
+                </div>
+
+                <div class="taler-modal__status-actions">
+                    <div class="taler-modal__help" id="taler-modal-check-status-help">
+                        <?php echo esc_html__('After you finish the payment in your wallet, click this button to refresh payment status.', 'taler-payments'); ?>
+                    </div>
+                    <div class="taler-modal__check-status-message" id="taler-modal-check-status-message" role="status" aria-live="polite"></div>
+                    <button type="button" class="taler-modal__secondary" id="taler-modal-check-status-btn"><?php echo esc_html__('Check payment status', 'taler-payments'); ?></button>
                 </div>
             </div>
         </div>

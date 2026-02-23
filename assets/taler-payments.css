@@ -131,6 +131,62 @@
   padding-top: 12px;
 }
 
+.taler-modal__status-actions {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  margin-top: 12px;
+  padding-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.taler-modal__check-status-message {
+  display: none;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.taler-modal__check-status-message:not(:empty) {
+  display: block;
+}
+
+.taler-modal__check-status-message--info {
+  color: #084298;
+  background-color: #cff4fc;
+  border-color: #b6effb;
+}
+
+.taler-modal__check-status-message--warning {
+  color: #664d03;
+  background-color: #fff3cd;
+  border-color: #ffecb5;
+}
+
+.taler-modal__check-status-message--success {
+  color: #0f5132;
+  background-color: #d1e7dd;
+  border-color: #badbcc;
+}
+
+.taler-modal__secondary {
+  display: inline-block;
+  text-align: center;
+  border: 1px solid #0a7;
+  background: #ffffff;
+  color: #0a7;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.taler-modal__secondary[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .taler-modal__qr-label {
   font-size: 17px;
   color: rgba(0, 0, 0, 0.65);

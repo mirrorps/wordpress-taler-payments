@@ -70,7 +70,7 @@
   async function createOrder(amount, summary) {
     var body = new URLSearchParams();
     body.set('action', 'taler_wp_create_order');
-    body.set('_ajax_nonce', TalerPayments.nonce);
+    body.set('_ajax_nonce', TalerPayments.nonceCreateOrder || TalerPayments.nonce);
     body.set('amount', amount);
     body.set('summary', summary);
 
@@ -94,7 +94,50 @@
       throw new Error(msg);
     }
 
-    return json.data.taler_pay_uri;
+    return {
+      payUri: json.data.taler_pay_uri,
+      orderId: json.data.order_id
+    };
+  }
+
+  async function checkOrderStatus(orderId) {
+    var body = new URLSearchParams();
+    body.set('action', 'taler_wp_check_order_status');
+    body.set('_ajax_nonce', TalerPayments.nonceCheckOrderStatus || TalerPayments.nonce);
+    body.set('order_id', orderId);
+
+    var res = await fetch(TalerPayments.ajaxUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+      body: body.toString()
+    });
+
+    var json;
+    try {
+      json = await res.json();
+    } catch (e) {
+      throw new Error(TalerPayments.i18n.errorGeneric);
+    }
+
+    if (!json || !json.success) {
+      var msg = (json && json.data && json.data.message) ? json.data.message : TalerPayments.i18n.errorGeneric;
+      throw new Error(msg);
+    }
+
+    return !!(json.data && json.data.is_paid);
+  }
+
+  function clearCheckStatusMessage(checkStatusMsg) {
+    if (!checkStatusMsg) return;
+    checkStatusMsg.className = 'taler-modal__check-status-message';
+    setText(checkStatusMsg, '');
+  }
+
+  function setCheckStatusMessage(checkStatusMsg, variant, message) {
+    if (!checkStatusMsg) return;
+    checkStatusMsg.className = 'taler-modal__check-status-message taler-modal__check-status-message--' + variant;
+    setText(checkStatusMsg, message);
   }
 
   function init() {
@@ -112,6 +155,10 @@
     var walletLink = $('#taler-modal-wallet-link');
     var qrHelp = $('#taler-modal-qr-help');
     var qrBox = $('#taler-modal-qr');
+    var checkStatusBtn = $('#taler-modal-check-status-btn');
+    var checkStatusHelp = $('#taler-modal-check-status-help');
+    var checkStatusMsg = $('#taler-modal-check-status-message');
+    var currentOrderId = '';
 
     // i18n text.
     setText($('#taler-modal-title'), TalerPayments.i18n.title);
@@ -129,6 +176,41 @@
     }
     if (walletLink) walletLink.href = TalerPayments.walletInfoUrl;
     setText(qrHelp, TalerPayments.i18n.qrHelp);
+    setText(checkStatusBtn, TalerPayments.i18n.checkPaymentStatus);
+    setText(checkStatusHelp, TalerPayments.i18n.checkPaymentStatusHelp);
+
+    if (checkStatusBtn) {
+      checkStatusBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        if (!currentOrderId) {
+          setText(errorEl, '');
+          setCheckStatusMessage(checkStatusMsg, 'info', TalerPayments.i18n.paymentStatusUnavailable);
+          return;
+        }
+
+        setText(errorEl, '');
+        setText(statusEl, '');
+        setCheckStatusMessage(checkStatusMsg, 'info', TalerPayments.i18n.checkingPaymentStatus);
+
+        checkOrderStatus(currentOrderId)
+          .then(function (isPaid) {
+            if (isPaid) {
+              setCheckStatusMessage(checkStatusMsg, 'success', '\u2713 ' + TalerPayments.i18n.paymentCompleted);
+              if (checkStatusBtn) checkStatusBtn.style.display = 'none';
+              return;
+            }
+
+            setCheckStatusMessage(checkStatusMsg, 'warning', TalerPayments.i18n.paymentNotYetCompleted);
+            if (checkStatusBtn) checkStatusBtn.style.display = '';
+          })
+          .catch(function (err) {
+            clearCheckStatusMessage(checkStatusMsg);
+            setText(errorEl, err && err.message ? err.message : TalerPayments.i18n.errorGeneric);
+            if (checkStatusBtn) checkStatusBtn.style.display = '';
+          });
+      });
+    }
 
     // Close handlers.
     modal.addEventListener('click', function (e) {
@@ -169,6 +251,9 @@
       setText(summaryEl, summary);
       setText(statusEl, TalerPayments.i18n.creatingOrder);
       setText(errorEl, '');
+      clearCheckStatusMessage(checkStatusMsg);
+      if (checkStatusBtn) checkStatusBtn.style.display = '';
+      currentOrderId = '';
       if (payBtn) payBtn.setAttribute('aria-disabled', 'true');
       if (payBtn) payBtn.href = '#';
       clearQr(qrBox);
@@ -176,8 +261,15 @@
       openModal(modal);
 
       createOrder(amount, summary)
-        .then(function (payUri) {
+        .then(function (orderData) {
+          var payUri = orderData && orderData.payUri ? orderData.payUri : '';
+          var orderId = orderData && orderData.orderId ? orderData.orderId : '';
+          if (!payUri || !orderId) {
+            throw new Error(TalerPayments.i18n.errorGeneric);
+          }
+
           setText(statusEl, '');
+          currentOrderId = orderId;
           if (payBtn) {
             payBtn = replacePayBtnWithHref(payBtn, payUri);
           }
@@ -210,6 +302,7 @@
         .catch(function (err) {
           setText(statusEl, '');
           setText(errorEl, err && err.message ? err.message : TalerPayments.i18n.errorGeneric);
+          currentOrderId = '';
           clearQr(qrBox);
         });
     });

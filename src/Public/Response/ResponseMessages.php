@@ -26,6 +26,11 @@ final class ResponseMessages
         return __('Invalid security token.', 'taler-payments');
     }
 
+    public static function invalidOrderId(): string
+    {
+        return __('Invalid order identifier.', 'taler-payments');
+    }
+
     public static function missingPayUri(): string
     {
         return __('Taler: order created but no pay URI available.', 'taler-payments');

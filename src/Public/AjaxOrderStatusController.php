@@ -1,22 +1,20 @@
 <?php
 namespace TalerPayments\Public;
 
-use TalerPayments\Public\DTO\CreateOrderRequest;
-use TalerPayments\Public\DTO\InvalidAmountException;
+use TalerPayments\Public\DTO\CheckOrderStatusRequest;
+use TalerPayments\Public\DTO\InvalidOrderIdException;
 use TalerPayments\Public\Input\InputInterface;
-use TalerPayments\Public\Response\ResponseMessages;
 use TalerPayments\Public\Response\JsonResponder;
+use TalerPayments\Public\Response\ResponseMessages;
 use TalerPayments\Public\Security\RequestSecurityInterface;
-use TalerPayments\Public\Validation\AmountValidatorInterface;
 
 /**
- * Handles public AJAX order creation endpoint.
+ * Handles public AJAX order payment status checks.
  */
-final class AjaxOrderController
+final class AjaxOrderStatusController
 {
     public function __construct(
         private readonly OrderService $orderService,
-        private readonly AmountValidatorInterface $amountValidator,
         private readonly InputInterface $input,
         private readonly RequestSecurityInterface $requestSecurity,
         private readonly JsonResponder $responder = new JsonResponder(),
@@ -29,32 +27,24 @@ final class AjaxOrderController
             $this->responder->error(ResponseMessages::methodNotAllowed(), 405);
         }
 
-        if (!$this->orderService->allowOrderCreateRequest()) {
+        if (!$this->orderService->allowOrderStatusRequest()) {
             $this->responder->error(ResponseMessages::tooManyRequests(), 429);
         }
 
         $nonce = (string) wp_unslash($this->input->get('_ajax_nonce', ''));
-        if (!$this->requestSecurity->isValidNonce('taler_wp_create_order', $nonce)) {
+        if (!$this->requestSecurity->isValidNonce('taler_wp_check_order_status', $nonce)) {
             $this->responder->error(ResponseMessages::invalidNonce(), 403);
         }
 
         try {
-            $request = CreateOrderRequest::fromInput($this->input, $this->amountValidator);
-        } catch (InvalidAmountException $e) {
-            $this->responder->error(ResponseMessages::invalidAmountFormat(), 400);
+            $request = CheckOrderStatusRequest::fromInput($this->input);
+        } catch (InvalidOrderIdException $e) {
+            $this->responder->error(ResponseMessages::invalidOrderId(), 400);
         }
 
         try {
-            $created = $this->orderService->createOrder($request->amount(), $request->summary());
-
-            if ($created === null) {
-                $this->responder->error(ResponseMessages::missingPayUri(), 502);
-            }
-
-            $this->responder->success([
-                'order_id' => $created->orderId(),
-                'taler_pay_uri' => $created->talerPayUri(),
-            ]);
+            $isPaid = $this->orderService->isOrderPaid($request->orderId());
+            $this->responder->success(['is_paid' => $isPaid]);
         } catch (\Taler\Exception\TalerException $e) {
             $this->responder->debugLog('taler-payments: taler exception', $e);
 
@@ -65,7 +55,6 @@ final class AjaxOrderController
             $this->responder->error(ResponseMessages::temporarilyUnavailable(), 502);
         } catch (\Throwable $e) {
             $this->responder->debugLog('taler-payments: runtime error', $e);
-
             $this->responder->error(ResponseMessages::runtimeError(), 500);
         }
     }
