@@ -7,6 +7,7 @@ use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
 use Taler\Api\Order\Dto\OrderV0;
 use Taler\Api\Order\Dto\PostOrderRequest;
+use TalerPayments\Public\Config\PublicUiTexts;
 use TalerPayments\Public\DTO\OrderCreationResult;
 use TalerPayments\Services\MerchantAuthConfigurator;
 use TalerPayments\Services\Taler;
@@ -146,11 +147,12 @@ final class OrderService
     private function createOrderWithClient(\Taler\Taler $client, string $amount, string $summary): ?OrderCreationResult
     {
         $orderClient = $client->order();
+        $publicTextOptions = PublicUiTexts::resolve(Options::get());
 
         $order = new OrderV0(
             summary: sanitize_text_field($summary),
             amount: new Amount(sanitize_text_field($amount)),
-            fulfillment_message: 'Thank you for your purchase. Your order will be fulfilled after payment.'
+            fulfillment_message: $publicTextOptions[PublicUiTexts::OPTION_THANK_YOU_MESSAGE]
         );
 
         $request = new PostOrderRequest(order: $order);

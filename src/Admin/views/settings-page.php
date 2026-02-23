@@ -9,7 +9,13 @@
  * @var bool $has_token
  * @var string $saved_base_url
  * @var bool $has_base_url
+ * @var string $thank_you_message
+ * @var string $pay_button_cta
+ * @var string $check_status_button_text
+ * @var string $check_status_hint
+ * @var bool $has_public_text_overrides
  * @var string $delete_confirm
+ * @var string $reset_public_texts_confirm
  */
 ?>
 <div class="wrap">
@@ -46,6 +52,10 @@
         <hr class="taler-divider" />
 
         <?php include __DIR__ . '/partials/token-form.php'; ?>
+
+        <hr class="taler-divider" />
+
+        <?php include __DIR__ . '/partials/public-texts-form.php'; ?>
 
         <hr class="taler-divider" />
     </div>

@@ -2,6 +2,7 @@
 namespace TalerPayments\Settings;
 
 use TalerPayments\Helpers\Crypto;
+use TalerPayments\Public\Config\PublicUiTexts;
 use TalerPayments\Settings\DTO\SanitizeContext;
 use TalerPayments\Settings\DTO\SanitizeResult;
 use TalerPayments\Services\MerchantAuthConfigurator;
@@ -40,6 +41,7 @@ final class Sanitizer
             SettingsFormMap::GROUP_BASEURL => $this->sanitizeBaseUrlGroup($input, $old, $new, $is_delete),
             SettingsFormMap::GROUP_USERPASS => $this->sanitizeUserPassGroup($input, $old, $new, $is_delete),
             SettingsFormMap::GROUP_TOKEN => $this->sanitizeTokenGroup($input, $old, $new, $is_delete),
+            SettingsFormMap::GROUP_PUBLIC_TEXTS => $this->sanitizePublicTextsGroup($input, $new, $is_delete),
             default => SanitizeResult::withoutLoginCheck($old), // Unknown option page (unexpected). Don't change anything.
         };
     }
@@ -169,6 +171,42 @@ final class Sanitizer
 
         $new['taler_token'] = $encrypted_token;
         return SanitizeResult::withLoginCheck($new, MerchantAuthConfigurator::MODE_TOKEN);
+    }
+
+    /**
+     * @param array<string, mixed> $input
+     * @param array<string, mixed> $new
+     */
+    private function sanitizePublicTextsGroup(array $input, array $new, bool $isDelete): SanitizeResult
+    {
+        $publicTextKeys = [
+            PublicUiTexts::OPTION_THANK_YOU_MESSAGE,
+            PublicUiTexts::OPTION_PAY_BUTTON_CTA,
+            PublicUiTexts::OPTION_CHECK_STATUS_BUTTON,
+            PublicUiTexts::OPTION_CHECK_STATUS_HINT,
+        ];
+
+        if ($isDelete) {
+            foreach ($publicTextKeys as $key) {
+                unset($new[$key]);
+            }
+            $this->addNoticeUpdated('taler_public_texts_reset', __('Public text customization reset to defaults.', 'taler-payments'));
+            return SanitizeResult::withoutLoginCheck($new);
+        }
+
+        foreach ($publicTextKeys as $key) {
+            $value = isset($input[$key]) ? sanitize_text_field(wp_unslash((string) $input[$key])) : '';
+            $value = trim($value);
+
+            if ($value === '') {
+                unset($new[$key]);
+                continue;
+            }
+
+            $new[$key] = $value;
+        }
+
+        return SanitizeResult::withoutLoginCheck($new);
     }
 
     private function encryptValueOrNotify(string $value, string $noticeCode, string $failureMessage): ?string

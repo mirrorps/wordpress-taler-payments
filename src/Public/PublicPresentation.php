@@ -2,6 +2,8 @@
 namespace TalerPayments\Public;
 
 use TalerPayments\Public\Config\PublicDefaults;
+use TalerPayments\Public\Config\PublicUiTexts;
+use TalerPayments\Settings\Options;
 
 /**
  * Handles public shortcode rendering, assets, and wallet support hints.
@@ -66,6 +68,8 @@ final class PublicPresentation
 
     public function enqueueAssets(): void
     {
+        $publicTextOptions = PublicUiTexts::resolve(Options::get());
+
         $base = $this->pluginBaseUrl . 'assets/';
         $assetsDir = $this->pluginBasePath . '/assets/';
         $cssVersion = $this->assetVersion($assetsDir . 'taler-payments.css');
@@ -110,14 +114,14 @@ final class PublicPresentation
             'i18n' => [
                 'title' => __('Taler Payment', 'taler-payments'),
                 'creatingOrder' => __('Preparing your payment…', 'taler-payments'),
-                'payInBrowser' => __('Pay with Taler wallet in the browser', 'taler-payments'),
+                'payInBrowser' => $publicTextOptions[PublicUiTexts::OPTION_PAY_BUTTON_CTA],
                 'walletInstallText' => __('To pay in the browser, the Taler Wallet extension must be installed.', 'taler-payments'),
                 'walletInstallLinkText' => __('Get the wallet', 'taler-payments'),
                 'qrHelp' => __('Or scan this QR code with your mobile wallet:', 'taler-payments'),
-                'checkPaymentStatus' => __('Check payment status', 'taler-payments'),
-                'checkPaymentStatusHelp' => __('After you finish the payment in your wallet, click this button to refresh payment status.', 'taler-payments'),
+                'checkPaymentStatus' => $publicTextOptions[PublicUiTexts::OPTION_CHECK_STATUS_BUTTON],
+                'checkPaymentStatusHelp' => $publicTextOptions[PublicUiTexts::OPTION_CHECK_STATUS_HINT],
                 'checkingPaymentStatus' => __('Checking payment status...', 'taler-payments'),
-                'paymentCompleted' => __('Payment received. Thank you!', 'taler-payments'),
+                'paymentCompleted' => $publicTextOptions[PublicUiTexts::OPTION_THANK_YOU_MESSAGE],
                 'paymentNotYetCompleted' => __('Payment not confirmed yet. Please complete payment and try again.', 'taler-payments'),
                 'paymentStatusUnavailable' => __('Order is still being prepared. Please try checking again in a moment.', 'taler-payments'),
                 'qrUnavailable' => __('QR generator not available.', 'taler-payments'),
@@ -163,6 +167,7 @@ final class PublicPresentation
             return;
         }
         $this->modalRendered = true;
+        $publicTextOptions = PublicUiTexts::resolve(Options::get());
 
         ?>
         <div class="taler-modal" id="taler-payments-modal" aria-hidden="true">
@@ -186,7 +191,7 @@ final class PublicPresentation
                 <div class="taler-modal__error" id="taler-modal-error" role="alert" aria-live="polite"></div>
 
                 <div class="taler-modal__actions">
-                    <a class="taler-modal__primary" id="taler-modal-pay-btn" href="#" rel="noreferrer" target="_blank"><?php echo esc_html__('Pay with Taler wallet in the browser', 'taler-payments'); ?></a>
+                    <a class="taler-modal__primary" id="taler-modal-pay-btn" href="#" rel="noreferrer" target="_blank"><?php echo esc_html($publicTextOptions[PublicUiTexts::OPTION_PAY_BUTTON_CTA]); ?></a>
                     <div class="taler-modal__help">
                         <div id="taler-modal-wallet-help">
                             <?php echo esc_html__('To pay in the browser, the GNU Taler Wallet extension must be installed.', 'taler-payments'); ?>
@@ -202,10 +207,10 @@ final class PublicPresentation
 
                 <div class="taler-modal__status-actions">
                     <div class="taler-modal__help" id="taler-modal-check-status-help">
-                        <?php echo esc_html__('After you finish the payment in your wallet, click this button to refresh payment status.', 'taler-payments'); ?>
+                        <?php echo esc_html($publicTextOptions[PublicUiTexts::OPTION_CHECK_STATUS_HINT]); ?>
                     </div>
                     <div class="taler-modal__check-status-message" id="taler-modal-check-status-message" role="status" aria-live="polite"></div>
-                    <button type="button" class="taler-modal__secondary" id="taler-modal-check-status-btn"><?php echo esc_html__('Check payment status', 'taler-payments'); ?></button>
+                    <button type="button" class="taler-modal__secondary" id="taler-modal-check-status-btn"><?php echo esc_html($publicTextOptions[PublicUiTexts::OPTION_CHECK_STATUS_BUTTON]); ?></button>
                 </div>
             </div>
         </div>

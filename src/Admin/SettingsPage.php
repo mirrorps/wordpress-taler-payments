@@ -1,6 +1,7 @@
 <?php
 namespace TalerPayments\Admin;
 
+use TalerPayments\Public\Config\PublicUiTexts;
 use TalerPayments\Settings\Options;
 use TalerPayments\Settings\SettingsSaveService;
 
@@ -68,6 +69,11 @@ final class SettingsPage
             'type'              => 'array',
             'default'           => [],
         ]);
+
+        register_setting('taler_public_texts_group', Options::OPTION_NAME, [
+            'type'              => 'array',
+            'default'           => [],
+        ]);
     }
 
     /**
@@ -98,7 +104,17 @@ final class SettingsPage
         $saved_base_url = isset($options['taler_base_url']) ? (string) $options['taler_base_url'] : '';
         $has_base_url = ($saved_base_url !== '');
 
+        $thank_you_message = isset($options[PublicUiTexts::OPTION_THANK_YOU_MESSAGE]) ? (string) $options[PublicUiTexts::OPTION_THANK_YOU_MESSAGE] : '';
+        $pay_button_cta = isset($options[PublicUiTexts::OPTION_PAY_BUTTON_CTA]) ? (string) $options[PublicUiTexts::OPTION_PAY_BUTTON_CTA] : '';
+        $check_status_button_text = isset($options[PublicUiTexts::OPTION_CHECK_STATUS_BUTTON]) ? (string) $options[PublicUiTexts::OPTION_CHECK_STATUS_BUTTON] : '';
+        $check_status_hint = isset($options[PublicUiTexts::OPTION_CHECK_STATUS_HINT]) ? (string) $options[PublicUiTexts::OPTION_CHECK_STATUS_HINT] : '';
+        $has_public_text_overrides = trim($thank_you_message) !== ''
+            || trim($pay_button_cta) !== ''
+            || trim($check_status_button_text) !== ''
+            || trim($check_status_hint) !== '';
+
         $delete_confirm = __('Deleting credentials is irreversible. Are you sure you want to continue?', 'taler-payments');
+        $reset_public_texts_confirm = __('Reset public text customization to defaults? This will remove all custom text values.', 'taler-payments');
 
         $view = plugin_dir_path(__FILE__) . 'views/settings-page.php';
         if (is_readable($view)) {

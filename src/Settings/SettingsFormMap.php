@@ -6,6 +6,7 @@ final class SettingsFormMap
     public const GROUP_BASEURL = 'taler_baseurl_group';
     public const GROUP_USERPASS = 'taler_userpass_group';
     public const GROUP_TOKEN = 'taler_token_group';
+    public const GROUP_PUBLIC_TEXTS = 'taler_public_texts_group';
 
     public static function deleteFlagForOptionPage(string $optionPage): ?string
     {
@@ -13,6 +14,7 @@ final class SettingsFormMap
             self::GROUP_BASEURL => 'taler_baseurl_delete',
             self::GROUP_USERPASS => 'taler_userpass_delete',
             self::GROUP_TOKEN => 'taler_token_delete',
+            self::GROUP_PUBLIC_TEXTS => 'taler_public_texts_reset',
             default => null,
         };
     }
