@@ -7,6 +7,7 @@ use TalerPayments\Public\Input\InputInterface;
 use TalerPayments\Public\Response\JsonResponder;
 use TalerPayments\Public\Response\ResponseMessages;
 use TalerPayments\Public\Security\RequestSecurityInterface;
+use TalerPayments\Services\OrderServiceInterface;
 
 /**
  * Handles public AJAX order payment status checks.
@@ -14,7 +15,7 @@ use TalerPayments\Public\Security\RequestSecurityInterface;
 final class AjaxOrderStatusController
 {
     public function __construct(
-        private readonly OrderService $orderService,
+        private readonly OrderServiceInterface $orderService,
         private readonly InputInterface $input,
         private readonly RequestSecurityInterface $requestSecurity,
         private readonly JsonResponder $responder = new JsonResponder(),

@@ -6,7 +6,7 @@ use TalerPayments\Public\Config\PublicUiTexts;
 use TalerPayments\Settings\DTO\SanitizeContext;
 use TalerPayments\Settings\DTO\SanitizeResult;
 use TalerPayments\Services\MerchantAuthConfigurator;
-use TalerPayments\Services\SettingsNotices;
+use TalerPayments\Services\SettingsNoticesInterface;
 
 /**
  * Settings API sanitize callback for `taler_options`.
@@ -14,7 +14,7 @@ use TalerPayments\Services\SettingsNotices;
 final class Sanitizer
 {
     public function __construct(
-        private readonly SettingsNotices $notices,
+        private readonly SettingsNoticesInterface $notices,
     ) {
     }
 

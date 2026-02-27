@@ -8,7 +8,7 @@ use TalerPayments\Settings\Options;
 /**
  * Taler SDK client factory.
  */
-final class Taler
+final class Taler implements TalerClientFactoryInterface
 {
     private ?\Taler\Taler $client = null;
     private ?TalerFactoryOptions $factoryOptions;

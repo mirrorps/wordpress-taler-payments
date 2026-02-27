@@ -10,16 +10,16 @@ final class MerchantBackendChecker
     private array $ran = [];
 
     public function __construct(
-        private readonly SettingsNotices $notices,
+        private readonly SettingsNoticesInterface $notices,
         ?MerchantAuthConfigurator $authConfigurator = null,
-        ?Taler $taler = null,
+        ?TalerClientFactoryInterface $taler = null,
     ) {
         $this->authConfigurator = $authConfigurator ?? new MerchantAuthConfigurator();
         $this->taler = $taler ?? new Taler();
     }
 
     private readonly MerchantAuthConfigurator $authConfigurator;
-    private readonly Taler $taler;
+    private readonly TalerClientFactoryInterface $taler;
 
     /**
      * Checks are only run when:

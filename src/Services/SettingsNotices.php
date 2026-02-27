@@ -4,7 +4,7 @@ namespace TalerPayments\Services;
 /**
  * Wrapper around the WordPress Settings API notice system.
  */
-final class SettingsNotices
+final class SettingsNotices implements SettingsNoticesInterface
 {
     /**
      * Add a settings notice message (error/updated/info), but only once per request/code.

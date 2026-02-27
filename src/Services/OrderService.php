@@ -1,5 +1,5 @@
 <?php
-namespace TalerPayments\Public;
+namespace TalerPayments\Services;
 
 use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
@@ -9,14 +9,12 @@ use Taler\Api\Order\Dto\OrderV0;
 use Taler\Api\Order\Dto\PostOrderRequest;
 use TalerPayments\Public\Config\PublicUiTexts;
 use TalerPayments\Public\DTO\OrderCreationResult;
-use TalerPayments\Services\MerchantAuthConfigurator;
-use TalerPayments\Services\Taler;
 use TalerPayments\Settings\Options;
 
 /**
  * Handles public order creation logic and request-level protections.
  */
-final class OrderService
+final class OrderService implements OrderServiceInterface
 {
     public function __construct(
         private readonly Taler $talerService = new Taler(),
@@ -38,7 +36,7 @@ final class OrderService
     public function createOrderPayUri(string $amount, string $summary): ?string
     {
         $created = $this->createOrder($amount, $summary);
-        
+
         return $created?->talerPayUri();
     }
 
@@ -188,7 +186,7 @@ final class OrderService
     private function isOrderPaidWithClient(\Taler\Taler $client, string $orderId): bool
     {
         $status = $client->order()->getOrder(sanitize_text_field($orderId));
-        
+
         return match (true) {
             $status instanceof CheckPaymentPaidResponse => true,
             $status instanceof CheckPaymentUnpaidResponse,
