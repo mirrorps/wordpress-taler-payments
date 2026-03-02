@@ -24,3 +24,4 @@ wp-config.php
 # Build artifacts
 dist/
 build/
+/.phpunit.cache/
