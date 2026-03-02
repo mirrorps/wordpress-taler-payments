@@ -25,3 +25,4 @@ wp-config.php
 dist/
 build/
 /.phpunit.cache/
+/phpstan.neon
