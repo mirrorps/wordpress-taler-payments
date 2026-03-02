@@ -1,6 +1,6 @@
 === Taler Payments ===
 Contributors: mirrorps
-Tags: taler, payments, donations, qr-code, ecommerce
+Tags: taler, payments, donations, ecommerce
 Requires at least: 6.0
 Tested up to: 6.0
 Requires PHP: 8.1
@@ -12,13 +12,29 @@ Accept payments and donations with GNU Taler via a simple shortcode and an in-pa
 
 == Description ==
 
-Taler Payments integrates the GNU Taler payment system into WordPress, allowing you to offer a payment button that:
+Taler Payments adds GNU Taler checkout to WordPress with a shortcode.
+
+When a visitor clicks your payment button, the plugin:
 
 - Creates a GNU Taler order only after the visitor clicks "Pay"
-- Opens the Taler wallet (browser extension) using a `taler://` payment URI
+- Opens the GNU Taler wallet using a `taler://` payment URI
 - Shows a QR code for mobile wallets
 
-### Usage (shortcode)
+This makes it suitable for donations and simple payment flows on pages and posts.
+
+== Installation ==
+
+1. Upload the `taler-payments` folder to the `/wp-content/plugins/` directory (or upload a zip in WordPress admin).
+2. Activate the plugin from the "Plugins" screen in WordPress.
+3. Go to **Settings -> Taler Payments**.
+4. Save your Merchant Backend settings:
+   - Base URL (must start with `https://` and include `/instances/<instance-id>`)
+   - Either Access Token, or Username + Password + Instance ID
+5. Add `[taler_pay_button]` to a page or post.
+
+== Usage ==
+
+= Basic shortcode =
 
 Add the shortcode to any post/page:
 
@@ -26,35 +42,33 @@ Add the shortcode to any post/page:
 
 Parameters:
 
-- `amount`: an amount in the form `CURRENCY:VALUE` (must be supported by your exchange)
-- `summary`: order summary shown to the payer
-- `text`: button call-to-action text (defaults to `Pay with Taler`)
-
-### Configuration
-
-Configure your Taler backend endpoint and API token using either environment variables or constants:
-
-- `TALER_BASE_URL`
-- `TALER_TOKEN`
-
-== Installation ==
-
-1. Upload the `taler-payments` folder to the `/wp-content/plugins/` directory (or upload a zip via the admin UI).
-2. Install PHP dependencies (required):
-   - Run `composer install --no-dev` inside the plugin directory so that `vendor/` exists.
-3. Set `TALER_BASE_URL` and `TALER_TOKEN` (environment variables or `wp-config.php` constants).
-4. Activate the plugin through the "Plugins" menu in WordPress.
-5. Add `[taler_pay_button]` to a page/post.
+- `amount` - Amount in the form `CURRENCY:VALUE` (example: `EUR:5.00`)
+- `summary` - Payment summary shown to the payer
+- `text` - Text shown on the page button (default: `Pay with Taler`)
 
 == Frequently Asked Questions ==
 
-= Does this plugin require the GNU Taler Wallet? =
+= Do visitors need the GNU Taler Wallet? =
 
-Yes. To pay in the browser, the visitor needs the GNU Taler Wallet browser extension. The payment modal includes a link to wallet information.
+Yes. For in-browser payment, the visitor needs the GNU Taler Wallet browser extension.  
+The payment modal includes a wallet information link.
+
+= Which credentials should I use: token or username/password? =
+
+You can use either:
+
+- Access Token, or
+- Username + Password + Instance ID
+
+If both are saved, the plugin prefers Access Token.
+
+= What happens if payment is not confirmed immediately? =
+
+The payer can click "Check payment status" in the modal after completing wallet steps.
 
 = What data does this plugin send? =
 
-When a visitor clicks the button, your WordPress site sends the configured `amount` and `summary` to your configured Taler backend to create an order and obtain the `taler://` payment URI.
+When a visitor clicks the pay button, your site sends the configured order amount and summary to your configured Taler Merchant Backend to create the order and retrieve payment status.
 
 == Third-party licenses ==
 
@@ -71,11 +85,13 @@ See:
 
 This plugin itself does not collect user profile information.
 
-When a visitor initiates a payment, your site contacts your configured Taler backend endpoint to create an order (using the amount and summary shown in the payment modal). Depending on your hosting/logging setup and backend configuration, server logs may contain IP addresses and request metadata.
+When a visitor initiates a payment, your site contacts your configured Taler Merchant Backend to create an order and check order status. Depending on your hosting and backend configuration, server logs may contain IP addresses and request metadata.
 
 == Screenshots ==
 
-1. Payment modal with pay link and QR code.
+1. Taler Payments settings page in WordPress admin.
+2. Payment modal with wallet link and QR code.
+3. Payment status check after wallet payment.
 
 == Changelog ==
 
