@@ -74,11 +74,11 @@ When a visitor clicks the pay button, your site sends the configured order amoun
 
 This plugin bundles:
 
-- QRCode.js (`assets/davidshimjs-qrcodejs-04f46c6/qrcode.min.js`) under the MIT License (c) 2012 davidshimjs.
+- QRCode.js (`js/davidshimjs-qrcodejs-04f46c6/qrcode.min.js`) under the MIT License (c) 2012 davidshimjs.
 
 See:
 
-- `assets/davidshimjs-qrcodejs-04f46c6/LICENSE`
+- `js/davidshimjs-qrcodejs-04f46c6/LICENSE`
 - `THIRD-PARTY-LICENSES.txt`
 
 == Privacy Policy ==

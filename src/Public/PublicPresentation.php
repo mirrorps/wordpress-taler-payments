@@ -70,15 +70,19 @@ final class PublicPresentation
     {
         $publicTextOptions = PublicUiTexts::resolve(Options::get());
 
-        $base = $this->pluginBaseUrl . 'assets/';
-        $assetsDir = $this->pluginBasePath . '/assets/';
-        $cssVersion = $this->assetVersion($assetsDir . 'taler-payments.css');
-        $qrcodeVersion = $this->assetVersion($assetsDir . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js');
-        $jsVersion = $this->assetVersion($assetsDir . 'taler-payments.js');
+        $cssBase = $this->pluginBaseUrl . 'css/';
+        $jsBase = $this->pluginBaseUrl . 'js/';
+
+        $cssDir = $this->pluginBasePath . '/css/';
+        $jsDir = $this->pluginBasePath . '/js/';
+
+        $cssVersion = $this->assetVersion($cssDir . 'taler-payments.css');
+        $qrcodeVersion = $this->assetVersion($jsDir . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js');
+        $jsVersion = $this->assetVersion($jsDir . 'taler-payments.js');
 
         wp_enqueue_style(
             'taler-payments',
-            $base . 'taler-payments.css',
+            $cssBase . 'taler-payments.css',
             [],
             $cssVersion
         );
@@ -86,7 +90,7 @@ final class PublicPresentation
         // QR generator.
         wp_enqueue_script(
             'taler-payments-qrcode',
-            $base . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js',
+            $jsBase . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js',
             [],
             $qrcodeVersion,
             true
@@ -94,7 +98,7 @@ final class PublicPresentation
 
         wp_enqueue_script(
             'taler-payments',
-            $base . 'taler-payments.js',
+            $jsBase . 'taler-payments.js',
             ['taler-payments-qrcode'],
             $jsVersion,
             true
@@ -106,7 +110,7 @@ final class PublicPresentation
             'nonceCreateOrder' => wp_create_nonce('taler_wp_create_order'),
             'nonceCheckOrderStatus' => wp_create_nonce('taler_wp_check_order_status'),
             'walletInfoUrl' => 'https://www.taler.net/en/wallet.html',
-            'qrCodeLibUrl' => $base . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js?ver=' . rawurlencode((string) $qrcodeVersion),
+            'qrCodeLibUrl' => $jsBase . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js?ver=' . rawurlencode((string) $qrcodeVersion),
             'defaults' => [
                 'amount' => PublicDefaults::AMOUNT,
                 'summary' => PublicDefaults::SUMMARY,

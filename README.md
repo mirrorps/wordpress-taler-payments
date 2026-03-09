@@ -108,7 +108,8 @@ Run tests:
 - `src/Public` - shortcode presentation, modal wiring, AJAX controllers
 - `src/Services` - merchant auth/config and order logic
 - `src/Settings` - sanitization and options mapping
-- `assets` - frontend/admin CSS and JS
+- `css` - frontend/admin CSS
+- `js` - frontend JS and bundled third-party library
 - `tests/Unit` - PHPUnit unit tests
 
 ## Contributing
@@ -124,11 +125,11 @@ When users trigger payment actions, WordPress sends order-related requests to th
 ## License and third-party components
 
 - Plugin license: GPLv2 or later
-- Bundled component: `assets/davidshimjs-qrcodejs-04f46c6/qrcode.min.js` (MIT License, davidshimjs)
+- Bundled component: `js/davidshimjs-qrcodejs-04f46c6/qrcode.min.js` (MIT License, davidshimjs)
 
 See:
 
-- `assets/davidshimjs-qrcodejs-04f46c6/LICENSE`
+- `js/davidshimjs-qrcodejs-04f46c6/LICENSE`
 - `THIRD-PARTY-LICENSES.txt`
 ## Funding
 

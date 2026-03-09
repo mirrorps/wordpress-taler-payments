@@ -42,8 +42,8 @@ final class SettingsPage
         $plugin_root = dirname(__FILE__, 3);
         $plugin_file = $plugin_root . '/taler-payments.php';
 
-        $css_path = $plugin_root . '/assets/taler-admin.css';
-        $css_url  = plugin_dir_url($plugin_file) . 'assets/taler-admin.css';
+        $css_path = $plugin_root . '/css/taler-admin.css';
+        $css_url  = plugin_dir_url($plugin_file) . 'css/taler-admin.css';
         $ver      = @filemtime($css_path) ?: (defined('TALER_PAYMENTS_VERSION') ? TALER_PAYMENTS_VERSION : '1.0.0');
 
         wp_enqueue_style('taler-payments-admin', $css_url, [], $ver);

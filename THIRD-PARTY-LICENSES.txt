@@ -8,7 +8,7 @@ the following third-party component under its own license:
 QRCode.js (davidshimjs/qrcodejs)
 ----------------------------------------------------------------------------
 Files:
-  - assets/davidshimjs-qrcodejs-04f46c6/qrcode.min.js
+  - js/davidshimjs-qrcodejs-04f46c6/qrcode.min.js
 
 License: MIT
 Copyright (c) 2012 davidshimjs
