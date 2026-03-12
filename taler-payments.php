@@ -3,7 +3,7 @@
  * Plugin Name: Taler Payments
  * Plugin URI: https://github.com/mirrorps/wordpress-taler-payments
  * Description: The Taler Payments plugin integrates the GNU Taler payment system, enabling seamless payments and donations on any WordPress site.
- * Version: 0.1.0
+ * Version: 1.2.0
  * License: GPLv2 or later
  * Author: mirrorps
  */
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-define('TALER_PAYMENTS_VERSION', '0.1.1');
+define('TALER_PAYMENTS_VERSION', '1.2.0');
 
 add_action('plugins_loaded', static function (): void {
     static $booted = false;

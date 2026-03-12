@@ -4,6 +4,10 @@
  * @var bool $has_base_url
  * @var string $delete_confirm
  */
+
+if (!defined('ABSPATH')){
+    exit;
+}
 ?>
 <h3 class="taler-settings-subheading"><?php echo esc_html__('Base URL', 'taler-payments'); ?></h3>
 <form id="taler-baseurl-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">

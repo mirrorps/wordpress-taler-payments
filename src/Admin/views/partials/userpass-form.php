@@ -6,6 +6,10 @@
  * @var bool $has_userpass
  * @var string $delete_confirm
  */
+
+if (!defined('ABSPATH')){
+    exit;
+}
 ?>
 <h3 class="taler-settings-subheading"><?php echo esc_html__('Username & Password', 'taler-payments'); ?></h3>
 <form id="taler-userpass-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">

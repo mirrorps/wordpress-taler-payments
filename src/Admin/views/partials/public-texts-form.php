@@ -10,6 +10,10 @@ use TalerPayments\Public\Config\PublicUiTexts;
  * @var bool $has_public_text_overrides
  * @var string $reset_public_texts_confirm
  */
+
+if (!defined('ABSPATH')){
+    exit;
+}
 ?>
 <h3 class="taler-settings-subheading"><?php echo esc_html__('Public Text Customization', 'taler-payments'); ?></h3>
 <form id="taler-public-texts-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">

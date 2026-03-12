@@ -5,6 +5,10 @@ use TalerPayments\Public\Config\PublicUiTexts;
 use TalerPayments\Settings\Options;
 use TalerPayments\Settings\SettingsSaveService;
 
+if (!defined('ABSPATH')){
+    exit;
+}
+
 /**
  * Admin settings page wiring + rendering.
  */
@@ -83,7 +87,7 @@ final class SettingsPage
     public function sanitizeOptions($input): array
     {
         // dd($_POST, $input);
-        return $this->saveService->sanitizeForSave($input, $_POST, Options::get());
+        return $this->saveService->sanitizeForSave($input, filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW), Options::get());
     }
 
     public function render(): void

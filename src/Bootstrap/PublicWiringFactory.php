@@ -27,7 +27,7 @@ final class PublicWiringFactory
         return new AjaxOrderController(
             $orderService,
             new AmountValidator(),
-            new ArrayInput($_POST),
+            new ArrayInput(filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW) ?? []),
             new WordPressRequestSecurity(),
             new JsonResponder()
         );
@@ -42,7 +42,7 @@ final class PublicWiringFactory
 
         return new AjaxOrderStatusController(
             $orderService,
-            new ArrayInput($_POST),
+            new ArrayInput(filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW) ?? []),
             new WordPressRequestSecurity(),
             new JsonResponder()
         );

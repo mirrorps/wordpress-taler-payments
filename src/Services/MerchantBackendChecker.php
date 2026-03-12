@@ -58,7 +58,9 @@ final class MerchantBackendChecker
                 'taler_options',
                 'taler_backend_login_ok',
                 sprintf(
+                    /* translators: 1: auth method label */
                     __('Merchant backend login test successful (%s).', 'taler-payments'),
+                    (string) $authLabel,
                     $authLabel
                 ),
                 'updated'
@@ -68,6 +70,7 @@ final class MerchantBackendChecker
             $this->notices->addOnce(
                 'taler_options',
                 'taler_backend_login_invalid',
+                /* translators: 1: auth method label */
                 __('Merchant backend login test failed: invalid configuration (is this a Taler Merchant Backend base URL?).', 'taler-payments'),
                 'error'
             );
@@ -96,20 +99,26 @@ final class MerchantBackendChecker
     {
         if ($authMethod === MerchantAuthConfigurator::AUTH_METHOD_TOKEN) {
             return [
+                /* translators: 1: auth method label */
                 __('Access Token', 'taler-payments'),
+                /* translators: 1: auth method label */
                 __('access token', 'taler-payments'),
             ];
         }
 
         if ($authMethod === MerchantAuthConfigurator::AUTH_METHOD_USERPASS) {
             return [
+                /* translators: 1: auth method label */
                 __('Username & Password', 'taler-payments'),
+                /* translators: 1: auth method label */
                 __('username, password, and instance ID', 'taler-payments'),
             ];
         }
 
         return [
+            /* translators: 1: auth method label */
             __('Credentials', 'taler-payments'),
+            /* translators: 1: auth method label */
             __('credentials', 'taler-payments'),
         ];
     }
@@ -127,7 +136,7 @@ final class MerchantBackendChecker
             'taler_options',
             'taler_backend_login_failed',
             sprintf(
-                /* 1: auth method label, 2: failing step, 3: optional status text, 4: optional error slug */
+                /* translators: 1: auth method label, 2: failing step, 3: optional status text, 4: optional error slug */
                 __('Merchant backend login test failed (error: %1$s): %2$s%3$s.%4$s', 'taler-payments'),
                 $authLabel,
                 $step,

@@ -17,6 +17,10 @@
  * @var string $delete_confirm
  * @var string $reset_public_texts_confirm
  */
+
+if (!defined('ABSPATH')){
+    exit;
+}
 ?>
 <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
@@ -26,18 +30,25 @@
 
         <div class="notice notice-info inline">
             <p><?php
-                echo wp_kses_post(sprintf(
+                echo wp_kses_post(
                     __('<strong>Security:</strong> Passwords and tokens are first <strong>encrypted</strong> and then stored in the database.', 'taler-payments')
-                ));
+                );
             ?></p>
         </div>
 
         <div class="notice notice-info inline">
-            <p><?php echo wp_kses_post(sprintf(
-                __('To access the <strong>Taler Merchant Backend</strong> provide either <strong>%1$s</strong> or an <strong>%2$s</strong>. If both are supplied, the <strong>%2$s</strong> takes priority.', 'taler-payments'),
-                esc_html__('Username & Password', 'taler-payments'),
-                esc_html__('Access Token', 'taler-payments')
-            )); ?>
+            <p>
+                <?php
+                echo wp_kses_post(
+                    sprintf(
+                        /* translators: 1: "Taler Merchant Backend", 2: "Username & Password", 3: "Access Token" */
+                        __('To access the %1$s provide either %2$s or an %3$s. If both are supplied, %3$s takes priority.', 'taler-payments'),
+                        '<strong>' . esc_html__('Taler Merchant Backend', 'taler-payments') . '</strong>',
+                        '<strong>' . esc_html__('Username & Password', 'taler-payments') . '</strong>',
+                        '<strong>' . esc_html__('Access Token', 'taler-payments') . '</strong>'
+                    )
+                );
+                ?>
             </p>
         </div>
 

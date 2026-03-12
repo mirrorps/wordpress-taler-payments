@@ -5,7 +5,7 @@
   "license": "GPL-2.0-or-later",
   "require": {
     "php": ">=8.1",
-    "mirrorps/taler-php": "dev-main",
+    "mirrorps/taler-php": "~1.2.0",
     "guzzlehttp/guzzle": "^7.0",
     "php-http/guzzle7-adapter": "^1.0"
   },

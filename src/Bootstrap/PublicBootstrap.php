@@ -4,6 +4,11 @@ namespace TalerPayments\Bootstrap;
 use TalerPayments\Public\AjaxOrderController;
 use TalerPayments\Public\AjaxOrderStatusController;
 
+if (!defined('ABSPATH')){
+    exit;
+}
+
+
 /**
  * Registers public-facing plugin wiring.
  */

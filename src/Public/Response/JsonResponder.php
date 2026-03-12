@@ -19,6 +19,7 @@ final class JsonResponder
     public function debugLog(string $prefix, \Throwable $e): void
     {
         if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log($prefix . ': ' . $e->getMessage() . ' (code: ' . $e->getCode() . ')');
         }
     }
