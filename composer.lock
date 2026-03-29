@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f35c1ca1595221d6a92cc6b46ffd4335",
+    "content-hash": "6d97cc066eb0444fcc803e8d3077f41e",
     "packages": [
         {
             "name": "composer/semver",
@@ -592,16 +592,16 @@
         },
         {
             "name": "mirrorps/taler-php",
-            "version": "dev-main",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mirrorps/taler-php.git",
-                "reference": "867742771242e5c4568a658aa427f1253b124ba8"
+                "reference": "da813e9d2f16cbc7786a6abcd51793abacafc021"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mirrorps/taler-php/zipball/867742771242e5c4568a658aa427f1253b124ba8",
-                "reference": "867742771242e5c4568a658aa427f1253b124ba8",
+                "url": "https://api.github.com/repos/mirrorps/taler-php/zipball/da813e9d2f16cbc7786a6abcd51793abacafc021",
+                "reference": "da813e9d2f16cbc7786a6abcd51793abacafc021",
                 "shasum": ""
             },
             "require": {
@@ -630,7 +630,6 @@
                 "php-http/async-client-implementation": "For async HTTP requests (e.g., symfony/http-client, php-http/guzzle7-adapter)",
                 "psr/log-implementation": "For logging support (e.g., monolog/monolog)"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "files": [
@@ -654,9 +653,9 @@
             "description": "PHP SDK for GNU Taler REST API",
             "support": {
                 "issues": "https://github.com/mirrorps/taler-php/issues",
-                "source": "https://github.com/mirrorps/taler-php/tree/main"
+                "source": "https://github.com/mirrorps/taler-php/tree/v1.2.1"
             },
-            "time": "2026-01-30T18:21:37+00:00"
+            "time": "2026-03-25T14:46:10+00:00"
         },
         {
             "name": "php-http/guzzle7-adapter",
@@ -3268,14 +3267,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mirrorps/taler-php": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.1"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
