@@ -47,7 +47,7 @@ final class AjaxOrderStatusController
             $isPaid = $this->orderService->isOrderPaid($request->orderId());
             $this->responder->success(['is_paid' => $isPaid]);
         } catch (\Taler\Exception\TalerException $e) {
-            $this->responder->debugLog('taler-payments: taler exception', $e);
+            $this->responder->debugLog('mirrorps-gnu-taler-payments: taler exception', $e);
 
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 $this->responder->error($e->getMessage(), 502);
@@ -55,7 +55,7 @@ final class AjaxOrderStatusController
 
             $this->responder->error(ResponseMessages::temporarilyUnavailable(), 502);
         } catch (\Throwable $e) {
-            $this->responder->debugLog('taler-payments: runtime error', $e);
+            $this->responder->debugLog('mirrorps-gnu-taler-payments: runtime error', $e);
             $this->responder->error(ResponseMessages::runtimeError(), 500);
         }
     }

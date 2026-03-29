@@ -8,10 +8,10 @@ This plugin adds a shortcode-driven payment UI that creates Merchant Backend ord
 
 If you only need to use the plugin on your own site:
 
-1. Copy plugin to `wp-content/plugins/taler-payments`.
+1. Copy plugin to `wp-content/plugins/mirrorps-payments-for-gnu-taler`.
 2. Run `composer install --no-dev` inside the plugin directory.
-3. Activate **Taler Payments** in WordPress.
-4. Open **Settings -> Taler Payments**.
+3. Activate **mirrorps Payments for GNU Taler** in WordPress.
+4. Open **Settings -> mirrorps Payments for GNU Taler**.
 5. Save:
    - Base URL (must include `/instances/<instance-id>` and use `https://`)
    - Either Access Token or Username/Password/Instance ID
@@ -103,7 +103,7 @@ Run tests:
 
 ## Project structure
 
-- `taler-payments.php` - plugin bootstrap and protocol allowance
+- `mirrorps-payments-for-gnu-taler.php` - plugin bootstrap and protocol allowance
 - `src/Admin` - settings page and form rendering
 - `src/Public` - shortcode presentation, modal wiring, AJAX controllers
 - `src/Services` - merchant auth/config and order logic

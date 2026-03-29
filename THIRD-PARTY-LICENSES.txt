@@ -1,4 +1,4 @@
-Third-party licenses for Taler Payments
+Third-party licenses for mirrorps Payments for GNU Taler
 ======================================
 
 This plugin is distributed under GPLv2 or later (see LICENSE). It also bundles

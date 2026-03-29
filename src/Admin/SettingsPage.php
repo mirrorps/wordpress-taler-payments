@@ -29,55 +29,50 @@ final class SettingsPage
     public function addAdminPage(): void
     {
         add_options_page(
-            __('Taler Payments Settings', 'taler-payments'),
-            __('Taler Payments', 'taler-payments'),
+            __('MirrorPS Payments for GNU Taler Settings', 'mirrorps-payments-for-gnu-taler'),
+            __('MirrorPS Payments for GNU Taler', 'mirrorps-payments-for-gnu-taler'),
             'manage_options',
-            'taler-payments',
+            'mirrorps-payments-for-gnu-taler',
             [$this, 'render']
         );
     }
 
     public function enqueueAssets(string $hook): void
     {
-        if ($hook !== 'settings_page_taler-payments') {
+        if ($hook !== 'settings_page_mirrorps-payments-for-gnu-taler') {
             return;
         }
 
         $plugin_root = dirname(__FILE__, 3);
-        $plugin_file = $plugin_root . '/taler-payments.php';
+        $plugin_file = $plugin_root . '/mirrorps-payments-for-gnu-taler.php';
 
         $css_path = $plugin_root . '/css/taler-admin.css';
         $css_url  = plugin_dir_url($plugin_file) . 'css/taler-admin.css';
-        $ver      = @filemtime($css_path) ?: (defined('TALER_PAYMENTS_VERSION') ? TALER_PAYMENTS_VERSION : '1.0.0');
 
-        wp_enqueue_style('taler-payments-admin', $css_url, [], $ver);
+        $mtime = @filemtime($css_path);
+        if ($mtime !== false && $mtime > 0) {
+            $ver = (string) $mtime;
+        } elseif (defined('TALER_PAYMENTS_VERSION')) {
+            $ver = TALER_PAYMENTS_VERSION;
+        } else {
+            $ver = '1.0.0';
+        }
+
+        wp_enqueue_style('mirrorps-gnu-taler-payments-admin', $css_url, [], $ver);
     }
 
     public function registerSettings(): void
     {
         // Register the option in each group so each form can submit independently.
-        // IMPORTANT: only attach the sanitize callback once to avoid duplicate sanitization/notices.
-        register_setting('taler_baseurl_group', Options::OPTION_NAME, [
+        $optionArgs = [
             'type'              => 'array',
             'sanitize_callback' => [$this, 'sanitizeOptions'],
             'default'           => [],
-        ]);
-
-        // Keep the forms separate by registering settings groups, but store everything in one option array.
-        register_setting('taler_userpass_group', Options::OPTION_NAME, [
-            'type'              => 'array',
-            'default'           => [],
-        ]);
-
-        register_setting('taler_token_group', Options::OPTION_NAME, [
-            'type'              => 'array',
-            'default'           => [],
-        ]);
-
-        register_setting('taler_public_texts_group', Options::OPTION_NAME, [
-            'type'              => 'array',
-            'default'           => [],
-        ]);
+        ];
+        register_setting('taler_baseurl_group', Options::OPTION_NAME, $optionArgs);
+        register_setting('taler_userpass_group', Options::OPTION_NAME, $optionArgs);
+        register_setting('taler_token_group', Options::OPTION_NAME, $optionArgs);
+        register_setting('taler_public_texts_group', Options::OPTION_NAME, $optionArgs);
     }
 
     /**
@@ -117,8 +112,8 @@ final class SettingsPage
             || trim($check_status_button_text) !== ''
             || trim($check_status_hint) !== '';
 
-        $delete_confirm = __('Deleting credentials is irreversible. Are you sure you want to continue?', 'taler-payments');
-        $reset_public_texts_confirm = __('Reset public text customization to defaults? This will remove all custom text values.', 'taler-payments');
+        $delete_confirm = __('Deleting credentials is irreversible. Are you sure you want to continue?', 'mirrorps-payments-for-gnu-taler');
+        $reset_public_texts_confirm = __('Reset public text customization to defaults? This will remove all custom text values.', 'mirrorps-payments-for-gnu-taler');
 
         $view = plugin_dir_path(__FILE__) . 'views/settings-page.php';
         if (is_readable($view)) {

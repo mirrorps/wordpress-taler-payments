@@ -18,8 +18,8 @@ final class MerchantAuthConfigurator
     private const USERPASS_SCOPE_CHECK = 'readonly';
     private const USERPASS_SCOPE_RUNTIME = 'order-full';
     private const TOKEN_DURATION_US = 3600_000_000;
-    private const DESCRIPTION_CHECK = 'WordPress taler-payments settings check';
-    private const DESCRIPTION_RUNTIME = 'WordPress taler-payments';
+    private const DESCRIPTION_CHECK = 'WordPress mirrorps-payments-for-gnu-taler settings check';
+    private const DESCRIPTION_RUNTIME = 'WordPress mirrorps-payments-for-gnu-taler';
 
     /** @var \Closure(string):string */
     private readonly \Closure $decrypt;

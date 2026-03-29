@@ -59,7 +59,7 @@ final class MerchantBackendChecker
                 'taler_backend_login_ok',
                 sprintf(
                     /* translators: 1: auth method label */
-                    __('Merchant backend login test successful (%s).', 'taler-payments'),
+                    __('Merchant backend login test successful (%s).', 'mirrorps-payments-for-gnu-taler'),
                     (string) $authLabel,
                     $authLabel
                 ),
@@ -71,7 +71,7 @@ final class MerchantBackendChecker
                 'taler_options',
                 'taler_backend_login_invalid',
                 /* translators: 1: auth method label */
-                __('Merchant backend login test failed: invalid configuration (is this a Taler Merchant Backend base URL?).', 'taler-payments'),
+                __('Merchant backend login test failed: invalid configuration (is this a Taler Merchant Backend base URL?).', 'mirrorps-payments-for-gnu-taler'),
                 'error'
             );
             return false;
@@ -82,7 +82,7 @@ final class MerchantBackendChecker
                 'taler_backend_login_exception',
                 sprintf(
                     /* translators: 1: auth method label, 2: credentials hint */
-                    __('Merchant backend login test failed (error: %1$s). Please verify Base URL and %2$s.', 'taler-payments'),
+                    __('Merchant backend login test failed (error: %1$s). Please verify Base URL and %2$s.', 'mirrorps-payments-for-gnu-taler'),
                     (string) $authLabel,
                     $credentialHint
                 ),
@@ -100,26 +100,26 @@ final class MerchantBackendChecker
         if ($authMethod === MerchantAuthConfigurator::AUTH_METHOD_TOKEN) {
             return [
                 /* translators: 1: auth method label */
-                __('Access Token', 'taler-payments'),
+                __('Access Token', 'mirrorps-payments-for-gnu-taler'),
                 /* translators: 1: auth method label */
-                __('access token', 'taler-payments'),
+                __('access token', 'mirrorps-payments-for-gnu-taler'),
             ];
         }
 
         if ($authMethod === MerchantAuthConfigurator::AUTH_METHOD_USERPASS) {
             return [
                 /* translators: 1: auth method label */
-                __('Username & Password', 'taler-payments'),
+                __('Username & Password', 'mirrorps-payments-for-gnu-taler'),
                 /* translators: 1: auth method label */
-                __('username, password, and instance ID', 'taler-payments'),
+                __('username, password, and instance ID', 'mirrorps-payments-for-gnu-taler'),
             ];
         }
 
         return [
             /* translators: 1: auth method label */
-            __('Credentials', 'taler-payments'),
+            __('Credentials', 'mirrorps-payments-for-gnu-taler'),
             /* translators: 1: auth method label */
-            __('credentials', 'taler-payments'),
+            __('credentials', 'mirrorps-payments-for-gnu-taler'),
         ];
     }
 
@@ -137,7 +137,7 @@ final class MerchantBackendChecker
             'taler_backend_login_failed',
             sprintf(
                 /* translators: 1: auth method label, 2: failing step, 3: optional status text, 4: optional error slug */
-                __('Merchant backend login test failed (error: %1$s): %2$s%3$s.%4$s', 'taler-payments'),
+                __('Merchant backend login test failed (error: %1$s): %2$s%3$s.%4$s', 'mirrorps-payments-for-gnu-taler'),
                 $authLabel,
                 $step,
                 $statusText,

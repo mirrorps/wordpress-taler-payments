@@ -63,7 +63,7 @@ final class AjaxOrderController
             ]);
             return;
         } catch (\Taler\Exception\TalerException $e) {
-            $this->responder->debugLog('taler-payments: taler exception', $e);
+            $this->responder->debugLog('mirrorps-gnu-taler-payments: taler exception', $e);
 
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 $this->responder->error($e->getMessage(), 502);
@@ -73,7 +73,7 @@ final class AjaxOrderController
             $this->responder->error(ResponseMessages::temporarilyUnavailable(), 502);
             return;
         } catch (\Throwable $e) {
-            $this->responder->debugLog('taler-payments: runtime error', $e);
+            $this->responder->debugLog('mirrorps-gnu-taler-payments: runtime error', $e);
 
             $this->responder->error(ResponseMessages::runtimeError(), 500);
             return;

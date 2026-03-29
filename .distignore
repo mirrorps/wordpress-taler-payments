@@ -1,0 +1,4 @@
+# WordPress.org directory graphics belong in SVN assets/, not the plugin zip.
+/assets/icon-*.png
+/assets/banner-*.png
+/assets/banner-*.jpg

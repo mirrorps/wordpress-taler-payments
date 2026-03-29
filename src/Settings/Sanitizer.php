@@ -28,7 +28,7 @@ final class Sanitizer
 
         if (!current_user_can('manage_options')) {
             // If this ever triggers, WordPress will still block saving, but this keeps the callback safe.
-            $this->addNoticeError('taler_options_permission_denied', __('You do not have permission to do this.', 'taler-payments'));
+            $this->addNoticeError('taler_options_permission_denied', __('You do not have permission to do this.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
@@ -65,7 +65,7 @@ final class Sanitizer
     {
         if ($isDelete) {
             unset($new['taler_base_url']);
-            $this->addNoticeUpdated('taler_baseurl_deleted', __('Base URL deleted.', 'taler-payments'));
+            $this->addNoticeUpdated('taler_baseurl_deleted', __('Base URL deleted.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($new);
         }
 
@@ -73,7 +73,7 @@ final class Sanitizer
         $base_url = trim($base_url);
 
         if ($base_url === '') {
-            $this->addNoticeError('taler_baseurl_required', __('Please provide a base URL.', 'taler-payments'));
+            $this->addNoticeError('taler_baseurl_required', __('Please provide a base URL.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
@@ -81,7 +81,7 @@ final class Sanitizer
         $parsed = wp_parse_url($base_url);
         $scheme = is_array($parsed) && isset($parsed['scheme']) ? strtolower((string) $parsed['scheme']) : '';
         if ($base_url === '' || $scheme !== 'https') {
-            $this->addNoticeError('taler_baseurl_invalid', __('Base URL must start with https://', 'taler-payments'));
+            $this->addNoticeError('taler_baseurl_invalid', __('Base URL must start with https://', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
@@ -99,7 +99,7 @@ final class Sanitizer
         // Deleting credentials should bypass HTML required validation via `formnovalidate` on the delete button.
         if ($isDelete) {
             unset($new['ext_username'], $new['ext_password'], $new['taler_instance']);
-            $this->addNoticeUpdated('taler_userpass_deleted', __('Username and password deleted.', 'taler-payments'));
+            $this->addNoticeUpdated('taler_userpass_deleted', __('Username and password deleted.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($new);
         }
 
@@ -108,18 +108,18 @@ final class Sanitizer
         $instance = isset($input['taler_instance']) ? sanitize_text_field(wp_unslash($input['taler_instance'])) : '';
 
         if ($username === '') {
-            $this->addNoticeError('taler_username_required', __('Please provide a username.', 'taler-payments'));
+            $this->addNoticeError('taler_username_required', __('Please provide a username.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
         if ($instance === '') {
-            $this->addNoticeError('taler_instance_required', __('Please provide an instance ID.', 'taler-payments'));
+            $this->addNoticeError('taler_instance_required', __('Please provide an instance ID.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
         $already_has_password = !empty($old['ext_password']);
         if ($password === '' && !$already_has_password) {
-            $this->addNoticeError('taler_password_required', __('Please provide a password.', 'taler-payments'));
+            $this->addNoticeError('taler_password_required', __('Please provide a password.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
@@ -130,7 +130,7 @@ final class Sanitizer
             $encrypted_password = $this->encryptValueOrNotify(
                 $password,
                 'taler_userpass_encrypt_failed',
-                __('Could not encrypt password. Credentials were not saved.', 'taler-payments')
+                __('Could not encrypt password. Credentials were not saved.', 'mirrorps-payments-for-gnu-taler')
             );
             if ($encrypted_password === null) {
                 return SanitizeResult::withoutLoginCheck($old);
@@ -150,20 +150,20 @@ final class Sanitizer
     {
         if ($isDelete) {
             unset($new['taler_token']);
-            $this->addNoticeUpdated('taler_token_deleted', __('Access token deleted.', 'taler-payments'));
+            $this->addNoticeUpdated('taler_token_deleted', __('Access token deleted.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($new);
         }
 
         $token = isset($input['taler_token']) ? (string) wp_unslash($input['taler_token']) : '';
         if ($token === '') {
-            $this->addNoticeError('taler_token_required', __('Please provide an access token.', 'taler-payments'));
+            $this->addNoticeError('taler_token_required', __('Please provide an access token.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($old);
         }
 
         $encrypted_token = $this->encryptValueOrNotify(
             $token,
             'taler_token_encrypt_failed',
-            __('Could not encrypt access token. Token was not saved.', 'taler-payments')
+            __('Could not encrypt access token. Token was not saved.', 'mirrorps-payments-for-gnu-taler')
         );
         if ($encrypted_token === null) {
             return SanitizeResult::withoutLoginCheck($old);
@@ -190,7 +190,7 @@ final class Sanitizer
             foreach ($publicTextKeys as $key) {
                 unset($new[$key]);
             }
-            $this->addNoticeUpdated('taler_public_texts_reset', __('Public text customization reset to defaults.', 'taler-payments'));
+            $this->addNoticeUpdated('taler_public_texts_reset', __('Public text customization reset to defaults.', 'mirrorps-payments-for-gnu-taler'));
             return SanitizeResult::withoutLoginCheck($new);
         }
 

@@ -1,18 +1,18 @@
-=== Taler Payments ===
+=== mirrorps Payments for GNU Taler ===
 Contributors: mirrorps
-Tags: taler, payments, donations, ecommerce
+Tags: gnu taler, payments, donations, ecommerce
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Accept payments and donations with GNU Taler via a simple shortcode and an in-page payment modal with QR code.
+Accept payments and donations with GNU Taler via a simple shortcode and an in-page payment modal with QR code. This plugin is not affiliated with the GNU Taler project.
 
 == Description ==
 
-Taler Payments adds GNU Taler checkout to WordPress with a shortcode.
+MirrorPS Payments for GNU Taler adds GNU Taler checkout to WordPress with a shortcode.
 
 When a visitor clicks your payment button, the plugin:
 
@@ -24,9 +24,9 @@ This makes it suitable for donations and simple payment flows on pages and posts
 
 == Installation ==
 
-1. Upload the `taler-payments` folder to the `/wp-content/plugins/` directory (or upload a zip in WordPress admin).
+1. Upload the `mirrorps-payments-for-gnu-taler` folder to the `/wp-content/plugins/` directory (or upload a zip in WordPress admin).
 2. Activate the plugin from the "Plugins" screen in WordPress.
-3. Go to **Settings -> Taler Payments**.
+3. Go to **Settings -> MirrorPS Payments for GNU Taler**.
 4. Save your Merchant Backend settings:
    - Base URL (must start with `https://` and include `/instances/<instance-id>`)
    - Either Access Token, or Username + Password + Instance ID
@@ -68,7 +68,7 @@ The payer can click "Check payment status" in the modal after completing wallet 
 
 = What data does this plugin send? =
 
-When a visitor clicks the pay button, your site sends the configured order amount and summary to your configured Taler Merchant Backend to create the order and retrieve payment status.
+When a visitor clicks the pay button, your site sends the configured order amount and summary to your configured GNU Taler Merchant Backend to create the order and retrieve payment status.
 
 == Third-party licenses ==
 
@@ -85,16 +85,20 @@ See:
 
 This plugin itself does not collect user profile information.
 
-When a visitor initiates a payment, your site contacts your configured Taler Merchant Backend to create an order and check order status. Depending on your hosting and backend configuration, server logs may contain IP addresses and request metadata.
+When a visitor initiates a payment, your site contacts your configured GNU Taler Merchant Backend to create an order and check order status. Depending on your hosting and backend configuration, server logs may contain IP addresses and request metadata.
 
 == Screenshots ==
 
-1. Taler Payments settings page in WordPress admin.
+1. Plugin settings page in WordPress admin.
 2. Payment modal with wallet link and QR code.
 3. Payment status check after wallet payment.
 
 == Changelog ==
 
+= 1.2.1 =
+* Renamed plugin for WordPress.org trademark guidelines; not affiliated with GNU Taler.
+* Register all settings with explicit sanitization callbacks.
+* Remove WordPress.org directory icon assets from the distribution zip (upload via SVN after approval).
+
 = 1.2.0 =
 * Initial release.
-

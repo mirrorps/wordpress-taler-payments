@@ -69,7 +69,7 @@ final class MerchantAuthConfiguratorTest extends TestCase
                 'instance' => 'default',
                 'scope' => 'order-full',
                 'duration_us' => 3600000000,
-                'description' => 'WordPress taler-payments',
+                'description' => 'WordPress mirrorps-payments-for-gnu-taler',
             ],
             $options->toArray()
         );
@@ -131,7 +131,7 @@ final class MerchantAuthConfiguratorTest extends TestCase
                 'instance' => 'default',
                 'scope' => 'readonly',
                 'duration_us' => 3600000000,
-                'description' => 'WordPress taler-payments settings check',
+                'description' => 'WordPress mirrorps-payments-for-gnu-taler settings check',
             ],
             $context->factoryOptions->toArray()
         );

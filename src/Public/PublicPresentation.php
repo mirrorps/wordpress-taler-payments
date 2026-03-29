@@ -81,7 +81,7 @@ final class PublicPresentation
         $jsVersion = $this->assetVersion($jsDir . 'taler-payments.js');
 
         wp_enqueue_style(
-            'taler-payments',
+            'mirrorps-gnu-taler-payments',
             $cssBase . 'taler-payments.css',
             [],
             $cssVersion
@@ -89,7 +89,7 @@ final class PublicPresentation
 
         // QR generator.
         wp_enqueue_script(
-            'taler-payments-qrcode',
+            'mirrorps-gnu-taler-payments-qrcode',
             $jsBase . 'davidshimjs-qrcodejs-04f46c6/qrcode.min.js',
             [],
             $qrcodeVersion,
@@ -97,14 +97,14 @@ final class PublicPresentation
         );
 
         wp_enqueue_script(
-            'taler-payments',
+            'mirrorps-gnu-taler-payments',
             $jsBase . 'taler-payments.js',
-            ['taler-payments-qrcode'],
+            ['mirrorps-gnu-taler-payments-qrcode'],
             $jsVersion,
             true
         );
 
-        wp_localize_script('taler-payments', 'TalerPayments', [
+        wp_localize_script('mirrorps-gnu-taler-payments', 'TalerPayments', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('taler_wp_create_order'),
             'nonceCreateOrder' => wp_create_nonce('taler_wp_create_order'),
@@ -116,21 +116,21 @@ final class PublicPresentation
                 'summary' => PublicDefaults::SUMMARY,
             ],
             'i18n' => [
-                'title' => __('Taler Payment', 'taler-payments'),
-                'creatingOrder' => __('Preparing your payment…', 'taler-payments'),
+                'title' => __('Taler Payment', 'mirrorps-payments-for-gnu-taler'),
+                'creatingOrder' => __('Preparing your payment ...', 'mirrorps-payments-for-gnu-taler'),
                 'payInBrowser' => $publicTextOptions[PublicUiTexts::OPTION_PAY_BUTTON_CTA],
-                'walletInstallText' => __('To pay in the browser, the Taler Wallet extension must be installed.', 'taler-payments'),
-                'walletInstallLinkText' => __('Get the wallet', 'taler-payments'),
-                'qrHelp' => __('Or scan this QR code with your mobile wallet:', 'taler-payments'),
+                'walletInstallText' => __('To pay in the browser, the Taler Wallet extension must be installed.', 'mirrorps-payments-for-gnu-taler'),
+                'walletInstallLinkText' => __('Get the wallet', 'mirrorps-payments-for-gnu-taler'),
+                'qrHelp' => __('Or scan this QR code with your mobile wallet:', 'mirrorps-payments-for-gnu-taler'),
                 'checkPaymentStatus' => $publicTextOptions[PublicUiTexts::OPTION_CHECK_STATUS_BUTTON],
                 'checkPaymentStatusHelp' => $publicTextOptions[PublicUiTexts::OPTION_CHECK_STATUS_HINT],
-                'checkingPaymentStatus' => __('Checking payment status...', 'taler-payments'),
+                'checkingPaymentStatus' => __('Checking payment status...', 'mirrorps-payments-for-gnu-taler'),
                 'paymentCompleted' => $publicTextOptions[PublicUiTexts::OPTION_THANK_YOU_MESSAGE],
-                'paymentNotYetCompleted' => __('Payment not confirmed yet. Please complete payment and try again.', 'taler-payments'),
-                'paymentStatusUnavailable' => __('Order is still being prepared. Please try checking again in a moment.', 'taler-payments'),
-                'qrUnavailable' => __('QR generator not available.', 'taler-payments'),
-                'errorGeneric' => __('Payment temporarily unavailable. Please try again.', 'taler-payments'),
-                'close' => __('Close', 'taler-payments'),
+                'paymentNotYetCompleted' => __('Payment not confirmed yet. Please complete payment and try again.', 'mirrorps-payments-for-gnu-taler'),
+                'paymentStatusUnavailable' => __('Order is still being prepared. Please try checking again in a moment.', 'mirrorps-payments-for-gnu-taler'),
+                'qrUnavailable' => __('QR generator not available.', 'mirrorps-payments-for-gnu-taler'),
+                'errorGeneric' => __('Payment temporarily unavailable. Please try again.', 'mirrorps-payments-for-gnu-taler'),
+                'close' => __('Close', 'mirrorps-payments-for-gnu-taler'),
             ],
         ]);
     }
@@ -177,16 +177,16 @@ final class PublicPresentation
         <div class="taler-modal" id="taler-payments-modal" aria-hidden="true">
             <div class="taler-modal__overlay" data-taler-close></div>
             <div class="taler-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="taler-modal-title">
-                <button type="button" class="taler-modal__close" data-taler-close aria-label="<?php echo esc_attr__('Close', 'taler-payments'); ?>">×</button>
-                <h2 class="taler-modal__title" id="taler-modal-title"><?php echo esc_html__('GNU Taler Payment', 'taler-payments'); ?></h2>
+                <button type="button" class="taler-modal__close" data-taler-close aria-label="<?php echo esc_attr__('Close', 'mirrorps-payments-for-gnu-taler'); ?>">×</button>
+                <h2 class="taler-modal__title" id="taler-modal-title"><?php echo esc_html__('GNU Taler Payment', 'mirrorps-payments-for-gnu-taler'); ?></h2>
 
                 <div class="taler-modal__summary">
                     <div class="taler-modal__row">
-                        <div class="taler-modal__label"><?php echo esc_html__('Amount', 'taler-payments'); ?></div>
+                        <div class="taler-modal__label"><?php echo esc_html__('Amount', 'mirrorps-payments-for-gnu-taler'); ?></div>
                         <div class="taler-modal__value" id="taler-modal-amount">—</div>
                     </div>
                     <div class="taler-modal__row">
-                        <div class="taler-modal__label"><?php echo esc_html__('Summary', 'taler-payments'); ?></div>
+                        <div class="taler-modal__label"><?php echo esc_html__('Summary', 'mirrorps-payments-for-gnu-taler'); ?></div>
                         <div class="taler-modal__value" id="taler-modal-summary">—</div>
                     </div>
                 </div>
@@ -198,14 +198,14 @@ final class PublicPresentation
                     <a class="taler-modal__primary" id="taler-modal-pay-btn" href="#" rel="noreferrer" target="_blank"><?php echo esc_html($publicTextOptions[PublicUiTexts::OPTION_PAY_BUTTON_CTA]); ?></a>
                     <div class="taler-modal__help">
                         <div id="taler-modal-wallet-help">
-                            <?php echo esc_html__('To pay in the browser, the GNU Taler Wallet extension must be installed.', 'taler-payments'); ?>
-                            <a id="taler-modal-wallet-link" href="https://www.taler.net/en/wallet.html" target="_blank" rel="noreferrer"><?php echo esc_html__('Get the wallet', 'taler-payments'); ?></a>
+                            <?php echo esc_html__('To pay in the browser, the GNU Taler Wallet extension must be installed.', 'mirrorps-payments-for-gnu-taler'); ?>
+                            <a id="taler-modal-wallet-link" href="https://www.taler.net/en/wallet.html" target="_blank" rel="noreferrer"><?php echo esc_html__('Get the wallet', 'mirrorps-payments-for-gnu-taler'); ?></a>
                         </div>
                     </div>
                 </div>
 
                 <div class="taler-modal__qr" style="text-align: center">
-                    <div class="taler-modal__qr-label" id="taler-modal-qr-help"><?php echo esc_html__('Or scan this QR code with your mobile wallet:', 'taler-payments'); ?></div>
+                    <div class="taler-modal__qr-label" id="taler-modal-qr-help"><?php echo esc_html__('Or scan this QR code with your mobile wallet:', 'mirrorps-payments-for-gnu-taler'); ?></div>
                     <div class="taler-modal__qr-box" id="taler-modal-qr"></div>
                 </div>
 

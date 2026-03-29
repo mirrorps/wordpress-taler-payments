@@ -26,12 +26,12 @@ if (!defined('ABSPATH')){
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <div class="taler-settings-group">
-        <h2><?php echo esc_html__('Taler Merchant Backend', 'taler-payments'); ?></h2>
+        <h2><?php echo esc_html__('Taler Merchant Backend', 'mirrorps-payments-for-gnu-taler'); ?></h2>
 
         <div class="notice notice-info inline">
             <p><?php
                 echo wp_kses_post(
-                    __('<strong>Security:</strong> Passwords and tokens are first <strong>encrypted</strong> and then stored in the database.', 'taler-payments')
+                    __('<strong>Security:</strong> Passwords and tokens are first <strong>encrypted</strong> and then stored in the database.', 'mirrorps-payments-for-gnu-taler')
                 );
             ?></p>
         </div>
@@ -42,10 +42,10 @@ if (!defined('ABSPATH')){
                 echo wp_kses_post(
                     sprintf(
                         /* translators: 1: "Taler Merchant Backend", 2: "Username & Password", 3: "Access Token" */
-                        __('To access the %1$s provide either %2$s or an %3$s. If both are supplied, %3$s takes priority.', 'taler-payments'),
-                        '<strong>' . esc_html__('Taler Merchant Backend', 'taler-payments') . '</strong>',
-                        '<strong>' . esc_html__('Username & Password', 'taler-payments') . '</strong>',
-                        '<strong>' . esc_html__('Access Token', 'taler-payments') . '</strong>'
+                        __('To access the %1$s provide either %2$s or an %3$s. If both are supplied, %3$s takes priority.', 'mirrorps-payments-for-gnu-taler'),
+                        '<strong>' . esc_html__('Taler Merchant Backend', 'mirrorps-payments-for-gnu-taler') . '</strong>',
+                        '<strong>' . esc_html__('Username & Password', 'mirrorps-payments-for-gnu-taler') . '</strong>',
+                        '<strong>' . esc_html__('Access Token', 'mirrorps-payments-for-gnu-taler') . '</strong>'
                     )
                 );
                 ?>

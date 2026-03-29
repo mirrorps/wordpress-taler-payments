@@ -1,6 +1,6 @@
-# Contributing to WP Taler Payments
+# Contributing to mirrorps Payments for GNU Taler
 
-First off, thank you for considering contributing to WP Taler Payments! Your help is greatly appreciated. 🎉
+First off, thank you for considering contributing! Your help is greatly appreciated. 🎉
 
 ## Table of Contents
 
@@ -35,7 +35,7 @@ If you find a bug, please [open an issue](https://github.com/mirrorps/wordpress-
 To suggest an enhancement, [open an issue](https://github.com/mirrorps/wordpress-taler-payments/issues) and describe:
 
 - The motivation for the enhancement
-- How it would improve WP Taler Payments
+- How it would improve the plugin
 - Any alternatives you’ve considered
 
 ## Your First Code Contribution
@@ -65,4 +65,4 @@ To suggest an enhancement, [open an issue](https://github.com/mirrorps/wordpress
 
 If you have questions, open an issue or start a discussion. We’re happy to help!
 
-Thanks for helping make WP Taler Payments better!
+Thanks for helping make this plugin better!

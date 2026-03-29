@@ -15,12 +15,12 @@ if (!defined('ABSPATH')){
     exit;
 }
 ?>
-<h3 class="taler-settings-subheading"><?php echo esc_html__('Public Text Customization', 'taler-payments'); ?></h3>
+<h3 class="taler-settings-subheading"><?php echo esc_html__('Public Text Customization', 'mirrorps-payments-for-gnu-taler'); ?></h3>
 <form id="taler-public-texts-form" method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
     <?php settings_fields('taler_public_texts_group'); ?>
     <table class="form-table" role="presentation">
         <tr>
-            <th scope="row"><label for="taler-thank-you-message"><?php echo esc_html__('Thank you message', 'taler-payments'); ?></label></th>
+            <th scope="row"><label for="taler-thank-you-message"><?php echo esc_html__('Thank you message', 'mirrorps-payments-for-gnu-taler'); ?></label></th>
             <td>
                 <input
                     type="text"
@@ -30,11 +30,11 @@ if (!defined('ABSPATH')){
                     class="regular-text"
                     placeholder="<?php echo esc_attr(PublicUiTexts::DEFAULT_THANK_YOU_MESSAGE); ?>"
                 />
-                <p class="description"><?php echo esc_html__('Shown after a successful payment. Leave empty to use the default text.', 'taler-payments'); ?></p>
+                <p class="description"><?php echo esc_html__('Shown after a successful payment. Leave empty to use the default text.', 'mirrorps-payments-for-gnu-taler'); ?></p>
             </td>
         </tr>
         <tr>
-            <th scope="row"><label for="taler-pay-button-cta"><?php echo esc_html__('Payment button CTA', 'taler-payments'); ?></label></th>
+            <th scope="row"><label for="taler-pay-button-cta"><?php echo esc_html__('Payment button CTA', 'mirrorps-payments-for-gnu-taler'); ?></label></th>
             <td>
                 <input
                     type="text"
@@ -44,11 +44,11 @@ if (!defined('ABSPATH')){
                     class="regular-text"
                     placeholder="<?php echo esc_attr(PublicUiTexts::DEFAULT_PAY_BUTTON_CTA); ?>"
                 />
-                <p class="description"><?php echo esc_html__('Shown on the main payment button in the modal. Leave empty to use the default text.', 'taler-payments'); ?></p>
+                <p class="description"><?php echo esc_html__('Shown on the main payment button in the modal. Leave empty to use the default text.', 'mirrorps-payments-for-gnu-taler'); ?></p>
             </td>
         </tr>
         <tr>
-            <th scope="row"><label for="taler-check-status-button-text"><?php echo esc_html__('Check payment status button text', 'taler-payments'); ?></label></th>
+            <th scope="row"><label for="taler-check-status-button-text"><?php echo esc_html__('Check payment status button text', 'mirrorps-payments-for-gnu-taler'); ?></label></th>
             <td>
                 <input
                     type="text"
@@ -58,11 +58,11 @@ if (!defined('ABSPATH')){
                     class="regular-text"
                     placeholder="<?php echo esc_attr(PublicUiTexts::DEFAULT_CHECK_STATUS_BUTTON); ?>"
                 />
-                <p class="description"><?php echo esc_html__('Shown on the button used to refresh payment status. Leave empty to use the default text.', 'taler-payments'); ?></p>
+                <p class="description"><?php echo esc_html__('Shown on the button used to refresh payment status. Leave empty to use the default text.', 'mirrorps-payments-for-gnu-taler'); ?></p>
             </td>
         </tr>
         <tr>
-            <th scope="row"><label for="taler-check-status-hint"><?php echo esc_html__('Check payment status hint', 'taler-payments'); ?></label></th>
+            <th scope="row"><label for="taler-check-status-hint"><?php echo esc_html__('Check payment status hint', 'mirrorps-payments-for-gnu-taler'); ?></label></th>
             <td>
                 <input
                     type="text"
@@ -72,12 +72,12 @@ if (!defined('ABSPATH')){
                     class="regular-text"
                     placeholder="<?php echo esc_attr(PublicUiTexts::DEFAULT_CHECK_STATUS_HINT); ?>"
                 />
-                <p class="description"><?php echo esc_html__('Hint shown above the status button. Leave empty to use the default text.', 'taler-payments'); ?></p>
+                <p class="description"><?php echo esc_html__('Hint shown above the status button. Leave empty to use the default text.', 'mirrorps-payments-for-gnu-taler'); ?></p>
             </td>
         </tr>
     </table>
     <div class="taler-form-actions">
-        <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'taler-payments'); ?></button>
+        <button type="submit" class="button button-primary"><?php echo esc_html__('Save Changes', 'mirrorps-payments-for-gnu-taler'); ?></button>
         <?php if ($has_public_text_overrides) : ?>
             <button
                 type="submit"
@@ -86,7 +86,7 @@ if (!defined('ABSPATH')){
                 class="button"
                 formnovalidate
                 onclick="return confirm('<?php echo esc_attr($reset_public_texts_confirm); ?>');"
-            ><?php echo esc_html__('Reset to defaults', 'taler-payments'); ?></button>
+            ><?php echo esc_html__('Reset to defaults', 'mirrorps-payments-for-gnu-taler'); ?></button>
         <?php endif; ?>
     </div>
 </form>
