@@ -8,7 +8,7 @@ Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Accept payments and donations with GNU Taler via a simple shortcode and an in-page payment modal with QR code. This plugin is not affiliated with the GNU Taler project.
+Accept GNU Taler payments: shortcode, modal, and QR.
 
 == Description ==
 
